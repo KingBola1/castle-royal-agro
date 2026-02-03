@@ -1,8 +1,7 @@
 # Use PHP 8.4
 FROM php:8.4-apache
 
-# Install system dependencies
-# CRITICAL CHANGE: Added 'libpq-dev' for PostgreSQL support
+# Install dependencies (Keep Postgres drivers!)
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     unzip \
@@ -34,5 +33,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Expose port
 EXPOSE 80
 
-# Run migrations and start Apache
-CMD bash -c "php artisan migrate --force && apache2-foreground"
+# START COMMAND (REMOVED 'MIGRATE' TO PREVENT CRASH)
+CMD apache2-foreground
