@@ -1,25 +1,20 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Artisan;
 
-// 1. Home Page
 Route::get('/', function () {
     return view('welcome');
 });
 
-// 2. The "Secret Door" to fix the Database
-Route::get('/force-migrate', function () {
-    try {
-        // Clear the "Old Memory" (Fixes the 127.0.0.1 error)
-        Artisan::call('config:clear');
-        Artisan::call('cache:clear');
-        
-        // Run the Database Setup
-        Artisan::call('migrate', ['--force' => true]);
-        
-        return '<h1 style="color:green">SUCCESS! ✅</h1><p>Database is connected and ready.</p>';
-    } catch (\Exception $e) {
-        return '<h1 style="color:red">Error:</h1><p>' . $e->getMessage() . '</p>';
-    }
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+require __DIR__.'/auth.php';
