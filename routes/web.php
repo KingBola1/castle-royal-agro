@@ -31,3 +31,16 @@ Route::get('/fix-site', function () {
     Illuminate\Support\Facades\Artisan::call('cache:clear');
     return '<h1>FIX DONE! ✅</h1><p>Go refresh the homepage.</p>';
 });
+use Illuminate\Support\Facades\Mail;
+
+Route::get('/test-email', function () {
+    try {
+        Mail::raw('If you are reading this, the email system is WORKING!', function ($msg) {
+            $msg->to(['kwamerahman83@gmail.com']) // <--- CHANGE THIS to your actual email
+                ->subject('Test Email from Castle Royal');
+        });
+        return '<h1>SUCCESS! ✅</h1> <p>Email sent successfully. Check your inbox (and Spam).</p>';
+    } catch (\Exception $e) {
+        return '<h1>FAILURE ❌</h1> <p>Error Message:</p> <pre>' . $e->getMessage() . '</pre>';
+    }
+});
