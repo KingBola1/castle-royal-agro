@@ -44,3 +44,20 @@ Route::get('/test-email', function () {
         return '<h1>FAILURE ❌</h1> <p>Error Message:</p> <pre>' . $e->getMessage() . '</pre>';
     }
 });
+use Illuminate\Support\Facades\Config;
+
+Route::get('/debug-smtp', function () {
+    $config = Config::get('mail.mailers.smtp');
+    $password = $config['password'];
+    $length = strlen($password);
+    
+    return "<h1>SMTP Diagnostic</h1>" .
+           "<p><strong>Host:</strong> " . $config['host'] . "</p>" .
+           "<p><strong>Port:</strong> " . $config['port'] . "</p>" .
+           "<p><strong>Username:</strong> " . $config['username'] . "</p>" .
+           "<p><strong>Encryption:</strong> " . ($config['encryption'] ?? 'null') . "</p>" .
+           "<hr>" .
+           "<p><strong>Password Length:</strong> " . $length . " characters (Should be approx 73)</p>" .
+           "<p><strong>First 3 chars:</strong> " . substr($password, 0, 3) . "***</p>" .
+           "<p><strong>Last 3 chars:</strong> ***" . substr($password, -3) . "</p>";
+});
