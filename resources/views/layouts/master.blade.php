@@ -97,7 +97,7 @@
                 {{-- NEW: Mobile Contact Trigger --}}
                 <button onclick="openGlobalContact(); toggleMobileMenu();" class="block px-3 py-4 text-lg font-medium text-gray-700 hover:text-moringa-leaf hover:bg-green-50 w-full text-center rounded-md">Contact Us</button>
                 
-                <a href="{{ url('/investors') }}" class="mt-4 w-3/4 text-center bg-moringa-leaf text-white px-6 py-3 rounded-full font-bold shadow-md">Investor Login</a>
+                <a href="{{ route('login') }}" class="mt-4 w-3/4 text-center bg-moringa-leaf text-white px-6 py-3 rounded-full font-bold shadow-md">Investor Login</a>
             </div>
         </div>
     </nav>
@@ -127,7 +127,7 @@
             <div class="mt-6 md:mt-0">
                 <h3 class="text-ghana-gold font-bold text-lg mb-4">Quick Links</h3>
                 <ul class="text-gray-300 text-sm space-y-2">
-                    <li><a href="{{ url('/investors') }}" class="hover:text-ghana-gold transition">Prospectus</a></li>
+                    <li><a href="{{ route('login') }}" class="hover:text-ghana-gold transition">Prospectus</a></li>
                     <li><a href="{{ url('/products') }}" class="hover:text-ghana-gold transition">Products</a></li>
                 </ul>
             </div>
