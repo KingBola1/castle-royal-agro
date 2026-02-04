@@ -1,7 +1,7 @@
 # Use PHP 8.4
 FROM php:8.4-apache
 
-# Install dependencies (Keep Postgres drivers!)
+# Install dependencies (PostgreSQL support included)
 RUN apt-get update && apt-get install -y \
     libzip-dev \
     unzip \
@@ -33,5 +33,5 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 # Expose port
 EXPOSE 80
 
-# START COMMAND (REMOVED 'MIGRATE' TO PREVENT CRASH)
-CMD apache2-foreground
+# START COMMAND (Clears Config Cache -> Starts Server)
+CMD bash -c "php artisan config:clear && apache2-foreground"
