@@ -71,8 +71,8 @@
                     {{-- NEW: Contact Trigger --}}
                     <button onclick="openGlobalContact()" class="text-gray-700 hover:text-moringa-leaf font-semibold transition">Contact Us</button>
 
-                    <a href="{{ url('/investors') }}" class="bg-moringa-leaf text-white px-6 py-2 rounded-full font-bold hover:bg-green-800 transition shadow-lg hover:scale-105">
-                        Investor Login
+                    <a href="{{ route('login') }}" class="bg-moringa-leaf text-white px-6 py-2 rounded-full font-bold hover:bg-green-800 transition shadow-lg hover:scale-105">
+                       Investor Login
                     </a>
                 </div>
 
