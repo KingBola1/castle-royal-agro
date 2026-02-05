@@ -67,3 +67,7 @@ Route::get('/debug-smtp', function () {
 Route::get('/about', function () {
     return view('about');
 })->name('about');
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+});
