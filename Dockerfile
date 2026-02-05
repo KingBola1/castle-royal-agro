@@ -34,4 +34,4 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 EXPOSE 80
 
 # START COMMAND (Clears Config Cache -> Starts Server)
-CMD bash -c "php artisan config:clear && apache2-foreground"
+CMD bash -c "php artisan migrate --force && php artisan config:clear && apache2-foreground"
