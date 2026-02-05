@@ -4,7 +4,6 @@
 
 @section('content')
     {{-- Section A: Hero (The 'Wow' Factor) --}}
-    {{-- Section A: Hero (The 'Wow' Factor) --}}
     <section class="relative min-h-screen flex items-center justify-center overflow-hidden py-20" id="hero-section">
         {{-- Dynamic Background Slider --}}
         <div class="absolute inset-0 z-0 bg-moringa-leaf">
@@ -43,11 +42,13 @@
                 Industrializing Moringa to create 1.6 Million Jobs and Power the 24-Hour Economy.
             </p>
             <div class="flex flex-col sm:flex-row justify-center gap-6">
+                {{-- Partner Button: Linked to Register/Investor Login --}}
                 <a href="{{ route('register') }}" class="bg-ghana-gold text-soil-brown font-bold py-4 px-10 rounded-full shadow-xl hover:bg-yellow-400 hover:scale-105 transition transform duration-300 uppercase tracking-wider text-sm">
-                  Partner With Us
+                    Partner With Us
                 </a>
-                <a href="#impact" class="bg-transparent border-2 border-white text-white font-bold py-4 px-10 rounded-full hover:bg-white hover:text-moringa-leaf hover:scale-105 transition transform duration-300 uppercase tracking-wider text-sm backdrop-blur-sm">
-                  View Impact Data
+                {{-- Impact Button: Linked to the About/Impact Page --}}
+                <a href="{{ url('/about') }}" class="bg-transparent border-2 border-white text-white font-bold py-4 px-10 rounded-full hover:bg-white hover:text-moringa-leaf hover:scale-105 transition transform duration-300 uppercase tracking-wider text-sm backdrop-blur-sm">
+                    View Impact Data
                 </a>
             </div>
         </div>
