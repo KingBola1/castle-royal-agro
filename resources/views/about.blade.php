@@ -7,9 +7,9 @@
     <section class="relative min-h-[60vh] flex items-center justify-center overflow-hidden py-20">
         {{-- Background Image with Overlay --}}
         <div class="absolute inset-0 z-0">
-            <img src="https://images.unsplash.com/photo-1628194481650-3233c0994d84?q=80&w=2070&auto=format&fit=crop" 
+            <img src="{{ asset('images/hero/slide1.png') }}" 
                  alt="Moringa Farm Overview" 
-                 class="w-full h-full object-cover">
+                 class="w-full h-full object-cover object-center">
             {{-- Homepage-style Gradient Overlay --}}
             <div class="absolute inset-0 bg-black/60 bg-gradient-to-b from-moringa-leaf/50 to-transparent"></div>
         </div>
