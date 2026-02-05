@@ -61,3 +61,6 @@ Route::get('/debug-smtp', function () {
            "<p><strong>First 3 chars:</strong> " . substr($password, 0, 3) . "***</p>" .
            "<p><strong>Last 3 chars:</strong> ***" . substr($password, -3) . "</p>";
 });
+Route::get('/about', function () {
+    return view('about');
+})->name('about');
