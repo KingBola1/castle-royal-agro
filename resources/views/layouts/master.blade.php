@@ -133,7 +133,7 @@
             </div>
         </div>
         <div class="text-center text-gray-500 text-xs mt-10 border-t border-gray-700 pt-4">
-            &copy; 2026 Castle Royal Agro Ghana Ltd.
+            &copy; 2026 Castle Royal Agro Ghana Ltd. All rights reserved.
         </div>
     </footer>
 
