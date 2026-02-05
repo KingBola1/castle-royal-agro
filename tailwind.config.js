@@ -14,6 +14,11 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
             },
+            colors: {
+                'ghana-gold': '#FFC107', // Vivid Gold/Yellow
+                'moringa-leaf': '#2E7D32', // Deep Organic Green
+                'soil-brown': '#4E342E', // Rich Earthy Brown
+            },
         },
     },
 
