@@ -21,6 +21,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
+        'ghana_card_id',
+        'address',
+        'next_of_kin_name',
+        'next_of_kin_phone',
+        'total_invested',
+        'active_acres',
+        'projected_roi',
     ];
 
     /**

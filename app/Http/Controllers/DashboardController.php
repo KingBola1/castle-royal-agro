@@ -12,12 +12,11 @@ class DashboardController extends Controller
         // 1. Get the currently logged-in user
         $user = Auth::user();
 
-        // 2. Fetch their real investment data (Placeholder logic for now)
-        // Later, we will create an 'Investments' table to sum up real money.
-        // For now, we set it to 0 or check if they have fields in the DB.
-        $totalInvested = 0; 
-        $activeAcres = 0;
-        $projectedRoi = 0;
+        // 2. Fetch their real investment data
+        // We now have these fields in the 'users' table.
+        $totalInvested = $user->total_invested ?? 0; 
+        $activeAcres = $user->active_acres ?? 0;
+        $projectedRoi = $user->projected_roi ?? 0;
 
         // 3. Send this data to the dashboard view
         return view('dashboard', compact('user', 'totalInvested', 'activeAcres', 'projectedRoi'));
