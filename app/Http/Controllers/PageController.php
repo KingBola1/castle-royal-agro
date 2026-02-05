@@ -21,8 +21,7 @@ class PageController extends Controller
         return view('investors');
     }
 
-    public function dashboard()
-    {
-        return view('dashboard');
-    }
+    // REMOVED: public function dashboard() 
+    // We removed it because DashboardController handles this now.
 }
+
