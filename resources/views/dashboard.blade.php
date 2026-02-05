@@ -5,10 +5,14 @@
         </h2>
     </x-slot>
 
-    {{-- Main Background --}}
-    <div class="py-12 bg-gray-50 min-h-screen relative">
+    {{-- Main Background: Golden Lemon Green Moringa Pattern --}}
+    <div class="py-12 min-h-screen relative bg-cover bg-center bg-fixed" 
+         style="background-image: url('{{ asset('images/backgrounds/moringa_pattern.png') }}');">
         
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10">
+        {{-- Overlay to ensure text readability --}}
+        <div class="absolute inset-0 bg-white/80 z-0"></div>
+
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10">
             
             {{-- Section 1: Welcome & Status --}}
             {{-- Border Top is YELLOW (Gold) --}}
