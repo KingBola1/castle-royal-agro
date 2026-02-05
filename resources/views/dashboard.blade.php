@@ -5,13 +5,17 @@
         </h2>
     </x-slot>
 
-    {{-- Main Background: Uses the 'Moringa Leaf' color faintly or white --}}
-    <div class="py-12 bg-gray-50 min-h-screen relative">
+    {{-- Main Background: Golden Lemon Green Theme --}}
+    <div class="py-12 min-h-screen relative overflow-hidden bg-gradient-to-br from-[#f9fce1] via-[#ebf8e1] to-[#e0f2f1]">
         
-        {{-- Optional: Background Texture Pattern --}}
-        <div class="absolute inset-0 z-0 opacity-5 pointer-events-none" 
-             style="background-color: #2E8B57; mask-image: radial-gradient(#000 1px, transparent 1px); mask-size: 20px 20px;">
+        {{-- 1. Repeating Pattern Overlay --}}
+        <div class="absolute inset-0 z-0 bg-repeat bg-[length:400px_400px] opacity-10 mix-blend-multiply pointer-events-none" 
+             style="background-image: url('{{ asset('images/backgrounds/moringa_pattern.png') }}');">
         </div>
+
+        {{-- 2. Decorative Gradient Blobs for Complexity --}}
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-ghana-gold/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-96 h-96 bg-moringa-leaf/10 rounded-full blur-3xl pointer-events-none"></div>
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10">
             
