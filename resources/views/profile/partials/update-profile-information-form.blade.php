@@ -64,7 +64,7 @@
         {{-- Ghana Card ID --}}
         <div>
             <x-input-label for="ghana_card_id" :value="__('Ghana Card ID')" />
-            <x-text-input id="ghana_card_id" name="ghana_card_id" type="text" class="mt-1 block w-full" :value="old('ghana_card_id', $user->ghana_card_id)" placeholder="GHA-000000000-0" />
+            <x-text-input id="ghana_card_id" name="ghana_card_id" type="text" class="mt-1 block w-full" :value="old('ghana_card_id', $user->ghana_card_id)" placeholder="GHA-xxxxxxxxx-x" />
             <x-input-error class="mt-2" :messages="$errors->get('ghana_card_id')" />
         </div>
 
@@ -80,6 +80,7 @@
             <x-input-label for="next_of_kin_phone" :value="__('Next of Kin Phone')" />
             <x-text-input id="next_of_kin_phone" name="next_of_kin_phone" type="text" class="mt-1 block w-full" :value="old('next_of_kin_phone', $user->next_of_kin_phone)" />
             <x-input-error class="mt-2" :messages="$errors->get('next_of_kin_phone')" />
+        </div>
 
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
