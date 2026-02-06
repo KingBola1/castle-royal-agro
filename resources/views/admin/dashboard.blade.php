@@ -19,45 +19,61 @@
                         <table class="w-full text-sm text-left text-gray-500">
                             <thead class="text-xs text-gray-700 uppercase bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="py-3 px-6">Name & Email</th>
-                                    <th scope="col" class="py-3 px-6">Role</th>
-                                    <th scope="col" class="py-3 px-6">Status</th>
-                                    <th scope="col" class="py-3 px-6">Joined Date</th>
-                                    <th scope="col" class="py-3 px-6 text-right">Actions</th>
+                                    <th scope="col" class="py-3 px-6 w-16">ID</th>
+                                    <th scope="col" class="py-3 px-6">NAME</th>
+                                    <th scope="col" class="py-3 px-6">EMAIL</th>
+                                    <th scope="col" class="py-3 px-6">ROLE</th>
+                                    <th scope="col" class="py-3 px-6">STATUS</th>
+                                    <th scope="col" class="py-3 px-6">DATE JOINED</th>
+                                    <th scope="col" class="py-3 px-6 text-right">ACTION</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($users as $user)
                                     <tr class="bg-white border-b hover:bg-gray-50">
-                                        <td class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap">
-                                            <div class="flex flex-col">
-                                                <span class="font-bold">{{ $user->name }}</span>
-                                                <span class="text-xs text-gray-400">{{ $user->email }}</span>
-                                            </div>
+                                        {{-- ID Column --}}
+                                        <td class="py-4 px-6">
+                                            {{ $user->id }}
                                         </td>
+                                        
+                                        {{-- Name Column --}}
+                                        <td class="py-4 px-6 font-medium text-gray-900">
+                                            {{ $user->name }}
+                                        </td>
+
+                                        {{-- Email Column --}}
+                                        <td class="py-4 px-6 text-gray-500">
+                                            {{ $user->email }}
+                                        </td>
+
+                                        {{-- Role Column --}}
                                         <td class="py-4 px-6">
                                             @if($user->role === 'super_admin')
-                                                <span class="bg-red-100 text-red-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Super Admin</span>
+                                                <span class="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded">Super Admin</span>
                                             @elseif($user->role === 'admin')
-                                                <span class="bg-red-100 text-red-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Admin</span>
+                                                <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded">Admin</span>
                                             @else
-                                                <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Investor</span>
+                                                <span class="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded">Investor</span>
                                             @endif
                                         </td>
+
+                                        {{-- Status Column --}}
                                         <td class="py-4 px-6">
-                                            {{-- Assuming a 'status' column exists or using logic. Defaulting to Active for now as requested. --}}
-                                            {{-- If you have a specific status column, replace 'true' with $user->is_active or similar --}}
-                                             @if($user->status === 'active' || !$user->status) 
-                                                <span class="bg-green-100 text-green-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Active</span>
+                                            @if($user->status === 'active' || !$user->status) 
+                                                <span class="bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded">Active</span>
                                             @else
-                                                 <span class="bg-red-100 text-red-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Frozen</span>
+                                                 <span class="bg-yellow-100 text-yellow-800 text-xs font-semibold px-2.5 py-0.5 rounded">Frozen</span>
                                             @endif
                                         </td>
+
+                                        {{-- Date Joined Column --}}
                                         <td class="py-4 px-6">
                                             {{ $user->created_at->format('M d, Y') }}
                                         </td>
+
+                                        {{-- Actions Column --}}
                                         <td class="py-4 px-6 text-right">
-                                            <a href="#" class="font-medium text-blue-600 hover:text-blue-500 hover:underline">Manage</a>
+                                            <a href="#" class="font-medium text-indigo-600 hover:text-indigo-900 hover:underline">Manage</a>
                                         </td>
                                     </tr>
                                 @endforeach
