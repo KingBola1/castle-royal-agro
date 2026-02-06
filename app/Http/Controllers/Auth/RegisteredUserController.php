@@ -41,7 +41,12 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        event(new Registered($user));
+        try {
+            event(new Registered($user));
+        } catch (\Exception $e) {
+            // Log the error but continue logging in the user
+            \Illuminate\Support\Facades\Log::error('Registration Email Failed: ' . $e->getMessage());
+        }
 
         Auth::login($user);
 
