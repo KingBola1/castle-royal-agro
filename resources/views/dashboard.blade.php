@@ -23,6 +23,11 @@
                             {{-- Text is GREEN (Moringa) --}}
                             <h3 class="text-3xl font-bold text-green-700">
                                 Welcome, {{ $user->name }}!
+                                @if(Auth::user()->role === 'super_admin' || Auth::user()->role === 'admin')
+                                    <span class="ml-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wide">
+                                        {{ str_replace('_', ' ', Auth::user()->role) }}
+                                    </span>
+                                @endif
                             </h3>
                             <p class="text-gray-500 mt-2 text-lg">
                                 Investor ID: <span class="font-mono text-amber-800 font-bold">CRA-{{ $user->id }}-{{ $user->created_at->format('Y') }}</span>
