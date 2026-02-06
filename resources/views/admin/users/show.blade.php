@@ -87,7 +87,7 @@
                                     <div class="col-span-6 sm:col-span-6">
                                         <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                                         <select id="status" name="status" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                            <option value="active" {{ ($user->status === 'active' || !$user->status) ? 'selected' : '' }}>Active</option>
+                                            <option value="active" {{ $user->status === 'active' ? 'selected' : '' }}>Active</option>
                                             <option value="frozen" {{ $user->status === 'frozen' ? 'selected' : '' }}>Frozen</option>
                                             <option value="blocked" {{ $user->status === 'blocked' ? 'selected' : '' }}>Blocked</option>
                                         </select>
