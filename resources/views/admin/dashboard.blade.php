@@ -73,7 +73,7 @@
 
                                         {{-- Actions Column --}}
                                         <td class="py-4 px-6 text-right">
-                                            <a href="#" class="font-medium text-indigo-600 hover:text-indigo-900 hover:underline">Manage</a>
+                                            <a href="{{ route('admin.users.show', $user->id) }}" class="font-medium text-indigo-600 hover:text-indigo-900 hover:underline">Manage</a>
                                         </td>
                                     </tr>
                                 @endforeach

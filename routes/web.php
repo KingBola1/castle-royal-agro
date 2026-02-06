@@ -37,6 +37,8 @@ Route::redirect('/investors', '/login');
 // --- Admin Panel (Protected) ---
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('admin.dashboard');
+    Route::get('/users/{user}', [AdminController::class, 'show'])->name('admin.users.show');
+    Route::put('/users/{user}', [AdminController::class, 'update'])->name('admin.users.update');
 });
 
 // --- Auth Routes (Login/Register) ---
