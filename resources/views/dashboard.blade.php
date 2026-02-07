@@ -59,7 +59,18 @@
                     <p class="text-sm text-gray-400 mt-2">Acres Secured: {{ $activeAcres }}</p>
                 </div>
 
-                {{-- Card 2: Projected ROI --}}
+                {{-- Card 2: Active Acres --}}
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-green-500">
+                    <div class="text-gray-500 text-sm font-medium uppercase tracking-wide">Land Portfolio</div>
+                    <div class="mt-2 flex items-baseline">
+                        <span class="text-3xl font-extrabold text-gray-900">
+                            {{ number_format(Auth::user()->active_acres, 1) }}
+                        </span>
+                        <span class="ml-2 text-sm font-medium text-gray-500">Acres</span>
+                    </div>
+                </div>
+
+                {{-- Card 3: Projected ROI --}}
                 <div class="bg-white overflow-hidden shadow-lg rounded-xl p-8 border border-gray-100 hover:shadow-2xl transition duration-300">
                     <div class="flex items-center justify-between mb-4">
                         <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Projected Return</h4>
