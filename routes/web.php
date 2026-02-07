@@ -59,7 +59,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 });
 
 // User Withdrawal Routes
-Route::middleware(['auth', 'verified', 'ensure.active'])->group(function () {
+Route::middleware(['auth', 'ensure.active'])->group(function () {
     Route::resource('withdrawals', WithdrawalController::class)->only(['create', 'store']);
 });
 
