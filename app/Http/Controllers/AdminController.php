@@ -65,6 +65,7 @@ class AdminController extends Controller
 
         $request->validate([
             'amount' => ['required', 'numeric', 'min:1'],
+            'roi_percentage' => ['required', 'numeric', 'min:0'],
             'acres' => ['required', 'numeric', 'min:0.1'],
         ]);
 
@@ -79,8 +80,10 @@ class AdminController extends Controller
         $user->increment('total_invested', $request->amount);
         $user->increment('active_acres', $request->acres);
         
-        // Simple ROI Logic: Assume 2.5x return for now (can be adjusted)
-        $user->increment('projected_roi', ($request->amount * 2.5));
+        // Calculate Projected Profit based on Input ROI %
+        // Logic: Profit = Amount * (Percentage / 100)
+        $projected_profit = $request->amount * ($request->roi_percentage / 100);
+        $user->increment('projected_roi', $projected_profit);
 
         return redirect()->back()->with('status', 'Investment transaction added successfully!');
     }

@@ -78,8 +78,8 @@
                             <svg class="w-8 h-8 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
                         </div>
                     </div>
-                    <p class="text-4xl font-extrabold text-green-700">{{ $projectedRoi }}%</p>
-                    <p class="text-sm text-gray-400 mt-2">Annual Yield Estimate</p>
+                    <p class="text-4xl font-extrabold text-green-700">GH₵ {{ number_format($projectedRoi, 2) }}</p>
+                    <p class="text-sm text-gray-400 mt-2">Projected Cash Return</p>
                 </div>
 
                 {{-- Card 3: Action Required --}}
