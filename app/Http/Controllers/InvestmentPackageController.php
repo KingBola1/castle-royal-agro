@@ -25,7 +25,7 @@ class InvestmentPackageController extends Controller
             'name' => 'required|string|max:255',
             'amount' => 'required|numeric|min:0',
             'roi_percentage' => 'required|numeric|min:0',
-            'acres' => 'required|numeric|min:0',
+            'acres' => 'nullable|numeric|min:0',
         ]);
 
         // Default duration to 12 months for now

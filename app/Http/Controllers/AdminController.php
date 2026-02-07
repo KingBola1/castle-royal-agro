@@ -96,7 +96,8 @@ class AdminController extends Controller
             'amount' => 'required|numeric|min:0',
             'acres' => 'required|numeric|min:0',
             'roi_percentage' => 'required|numeric|min:0',
-            'projected_profit' => 'nullable|numeric|min:0', // Should be calculated, but allow override if needed? No, calculate.
+            'projected_profit' => 'nullable|numeric|min:0', 
+            'package_name' => 'nullable|string|max:255',
         ]);
 
         // 1. Calculate Profit based on Input Percentage
@@ -106,6 +107,7 @@ class AdminController extends Controller
 
         // 2. Create the Receipt
         $investment = $user->investments()->create([
+            'package_name' => $request->package_name,
             'amount' => $request->amount,
             'acres' => $request->acres,
             'roi_percentage' => $request->roi_percentage, 

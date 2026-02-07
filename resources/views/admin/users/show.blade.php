@@ -119,13 +119,19 @@
                             <option value="">-- Choose a Preset --</option>
                             @foreach($packages as $pkg)
                                 <option value="{{ $pkg->id }}" 
+                                    data-name="{{ $pkg->name }}"
                                     data-amount="{{ $pkg->amount }}" 
                                     data-roi="{{ $pkg->roi_percentage }}" 
                                     data-acres="{{ $pkg->acres }}">
-                                    {{ $pkg->name }} - {{ number_format($pkg->amount) }} GHS ({{ $pkg->acres }} Acres)
+                                    {{ $pkg->name }} - {{ number_format($pkg->amount) }} GHS ({{ $pkg->acres ?? 'N/A' }} Acres)
                                 </option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <div class="col-span-1 md:col-span-4">
+                        <label for="package_name" class="block text-xs font-bold text-gray-700 uppercase">Package/Transaction Name</label>
+                        <input type="text" name="package_name" id="package_name" placeholder="e.g. Gold Package or Manual Top-up" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                     </div>
 
                     <div>
@@ -262,6 +268,7 @@
                         document.getElementById('amount').value = option.getAttribute('data-amount');
                         document.getElementById('roi_percentage').value = option.getAttribute('data-roi');
                         document.getElementById('acres').value = option.getAttribute('data-acres');
+                        document.getElementById('package_name').value = option.getAttribute('data-name');
                     }
                 }
 

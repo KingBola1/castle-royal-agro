@@ -13,6 +13,7 @@ class Investment extends Model
 
     protected $fillable = [
         'user_id',
+        'package_name',
         'amount',
         'acres',
         'status',
