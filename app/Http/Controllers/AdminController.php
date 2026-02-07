@@ -63,28 +63,29 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
 
-        $request->validate([
-            'amount' => ['required', 'numeric', 'min:1'],
-            'roi_percentage' => ['required', 'numeric', 'min:0'],
-            'acres' => ['required', 'numeric', 'min:0.1'],
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'acres' => 'required|numeric|min:0',
+            'roi_percentage' => 'required|numeric|min:0',
         ]);
 
-        // 1. Create Investment Record
+        // 1. Create the Receipt
         $user->investments()->create([
             'amount' => $request->amount,
             'acres' => $request->acres,
             'status' => 'active',
         ]);
 
-        // 2. Increment User Totals
+        // 2. Calculate Profit based on Input Percentage
+        // Example: 1000 * (40 / 100) = 400 Profit. Total ROI = 1400 (if you want principal + profit)
+        // OR just Profit. Let's assume Projected ROI = Pure Profit for now.
+        $profit = $request->amount * ($request->roi_percentage / 100);
+
+        // 3. Update User Totals
         $user->increment('total_invested', $request->amount);
         $user->increment('active_acres', $request->acres);
-        
-        // Calculate Projected Profit based on Input ROI %
-        // Logic: Profit = Amount * (Percentage / 100)
-        $projected_profit = $request->amount * ($request->roi_percentage / 100);
-        $user->increment('projected_roi', $projected_profit);
+        $user->increment('projected_roi', ($request->amount + $profit)); // Total Cash Return
 
-        return redirect()->back()->with('status', 'Investment transaction added successfully!');
+        return redirect()->back()->with('status', 'Investment added successfully!');
     }
 }

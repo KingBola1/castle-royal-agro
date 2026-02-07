@@ -71,15 +71,14 @@
                 </div>
 
                 {{-- Card 3: Projected ROI --}}
-                <div class="bg-white overflow-hidden shadow-lg rounded-xl p-8 border border-gray-100 hover:shadow-2xl transition duration-300">
-                    <div class="flex items-center justify-between mb-4">
-                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Projected Return</h4>
-                        <div class="p-3 bg-green-50 rounded-full">
-                            <svg class="w-8 h-8 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-                        </div>
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                    <div class="text-gray-500 text-sm font-medium uppercase tracking-wide">Projected Cash Return</div>
+                    <div class="mt-2 flex items-baseline">
+                        <span class="text-3xl font-extrabold text-gray-900">
+                            GH₵ {{ number_format(Auth::user()->projected_roi, 2) }}
+                        </span>
+                        <span class="ml-2 text-sm font-medium text-gray-500">Est. Yield</span>
                     </div>
-                    <p class="text-4xl font-extrabold text-green-700">GH₵ {{ number_format($projectedRoi, 2) }}</p>
-                    <p class="text-sm text-gray-400 mt-2">Projected Cash Return</p>
                 </div>
 
                 {{-- Card 3: Action Required --}}
