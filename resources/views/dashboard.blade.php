@@ -71,18 +71,21 @@
                 </div>
 
                 {{-- Card 3: Projected ROI --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 relative">
-                    <div class="text-gray-500 text-sm font-medium uppercase tracking-wide">Projected Cash Return</div>
-                    <div class="mt-2 flex items-baseline mb-4">
-                        <span class="text-3xl font-extrabold text-gray-900">
-                            GH₵ {{ number_format(Auth::user()->projected_roi, 2) }}
-                        </span>
-                        <span class="ml-2 text-sm font-medium text-gray-500">Est. Yield</span>
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-indigo-500 relative">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-gray-500 text-sm font-medium uppercase tracking-wide">Projected Cash Return</div>
+                            <div class="mt-2 flex items-baseline">
+                                <span class="text-3xl font-extrabold text-gray-900">
+                                    GH₵ {{ number_format(Auth::user()->projected_roi, 2) }}
+                                </span>
+                                <span class="ml-2 text-sm font-medium text-gray-500">Available</span>
+                            </div>
+                        </div>
+                        <a href="{{ route('withdrawals.create') }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition">
+                            Request Payout
+                        </a>
                     </div>
-                    
-                    <a href="{{ route('withdrawals.create') }}" class="inline-flex items-center px-3 py-1 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
-                        Request Payout
-                    </a>
                 </div>
 
                 {{-- Card 3: Action Required --}}

@@ -23,7 +23,7 @@
                             {{ __('Packages') }}
                         </x-nav-link>
                         <x-nav-link :href="route('withdrawals.index')" :active="request()->routeIs('withdrawals.index')">
-                            {{ __('Withdrawals') }}
+                            {{ __('Withdrawal Requests') }}
                         </x-nav-link>
                     @endif
                 </div>
