@@ -70,16 +70,16 @@ class AdminController extends Controller
         ]);
 
         // 1. Create the Receipt
+        // Calculate Profit based on Input Percentage
+        $profit = $request->amount * ($request->roi_percentage / 100);
+
         $user->investments()->create([
             'amount' => $request->amount,
             'acres' => $request->acres,
+            'roi_percentage' => $request->roi_percentage, // SAVE THE %
+            'projected_profit' => $profit,                // SAVE THE PROFIT
             'status' => 'active',
         ]);
-
-        // 2. Calculate Profit based on Input Percentage
-        // Example: 1000 * (40 / 100) = 400 Profit. Total ROI = 1400 (if you want principal + profit)
-        // OR just Profit. Let's assume Projected ROI = Pure Profit for now.
-        $profit = $request->amount * ($request->roi_percentage / 100);
 
         // 3. Update User Totals
         $user->increment('total_invested', $request->amount);

@@ -14,6 +14,8 @@ class Investment extends Model
         'amount',
         'acres',
         'status',
+        'roi_percentage',
+        'projected_profit',
     ];
 
     public function user()
