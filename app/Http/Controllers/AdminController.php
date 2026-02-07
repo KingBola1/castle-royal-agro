@@ -38,11 +38,17 @@ class AdminController extends Controller
         $validated = $request->validate([
             'role' => ['required', 'string', 'in:investor,admin,super_admin'],
             'status' => ['required', 'string', 'in:active,frozen,blocked'],
+            'total_invested' => ['nullable', 'numeric', 'min:0'],
+            'active_acres' => ['nullable', 'numeric', 'min:0'],
+            'projected_roi' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         // Explicitly Update Fields
         $user->role = $request->role;
         $user->status = $request->status;
+        $user->total_invested = $request->total_invested;
+        $user->active_acres = $request->active_acres;
+        $user->projected_roi = $request->projected_roi;
         $user->save(); // Force the write to database
 
         return redirect()->route('admin.users.show', $user->id)

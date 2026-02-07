@@ -7,68 +7,98 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Use a form that wraps the right column -->
+            <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
+                @csrf
+                @method('PUT')
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">User Personal Information</h3>
-                    
-                    <div class="space-y-4">
-                        <div>
-                            <span class="block text-sm font-bold text-gray-500">Full Name</span>
-                            <span class="block text-gray-900">{{ $user->name }}</span>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-gray-500">Email</span>
-                            <span class="block text-gray-900">{{ $user->email }}</span>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-gray-500">Phone</span>
-                            <span class="block text-gray-900">{{ $user->phone ?? 'Not Provided' }}</span>
-                        </div>
-                        <div>
-                            <span class="block text-sm font-bold text-gray-500">Ghana Card ID</span>
-                            <span class="block text-gray-900">{{ $user->ghana_card_id ?? 'Not Provided' }}</span>
-                        </div>
-                         <div>
-                            <span class="block text-sm font-bold text-gray-500">Next of Kin</span>
-                            <span class="block text-gray-900">{{ $user->next_of_kin_name ?? 'Not Provided' }}</span>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    <!-- LEFT COLUMN: Read-Only Info -->
+                    <div class="space-y-6">
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">User Personal Information</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <span class="block text-sm font-bold text-gray-500">Full Name</span>
+                                    <span class="block text-gray-900">{{ $user->name }}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-sm font-bold text-gray-500">Email</span>
+                                    <span class="block text-gray-900">{{ $user->email }}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-sm font-bold text-gray-500">Phone</span>
+                                    <span class="block text-gray-900">{{ $user->phone ?? 'Not Provided' }}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-sm font-bold text-gray-500">Ghana Card ID</span>
+                                    <span class="block text-gray-900">{{ $user->ghana_card_id ?? 'Not Provided' }}</span>
+                                </div>
+                                <div>
+                                    <span class="block text-sm font-bold text-gray-500">Next of Kin</span>
+                                    <span class="block text-gray-900">{{ $user->next_of_kin_name ?? 'Not Provided' }}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 mb-4">Account Actions</h3>
-                    
-                    <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
+                    <!-- RIGHT COLUMN: Editable Actions -->
+                    <div class="space-y-6">
+                        
+                        <!-- Account Actions Card -->
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Account Actions</h3>
+                            
+                            <div class="mb-4">
+                                <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+                                <select name="role" id="role" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                    <option value="investor" {{ $user->role == 'investor' ? 'selected' : '' }}>Investor</option>
+                                    <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="super_admin" {{ $user->role == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">Current Role: <strong>{{ $user->role }}</strong></p>
+                            </div>
 
-                        <div class="mb-4">
-                            <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                            <select name="role" id="role" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option value="investor" {{ $user->role == 'investor' ? 'selected' : '' }}>Investor</option>
-                                <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                                <option value="super_admin" {{ $user->role == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                            </select>
-                            <p class="text-xs text-gray-500 mt-1">Current Role: <strong>{{ $user->role }}</strong></p>
+                            <div class="mb-4">
+                                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                                <select name="status" id="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                    <option value="active" {{ $user->status == 'active' ? 'selected' : '' }}>Active</option>
+                                    <option value="frozen" {{ $user->status == 'frozen' ? 'selected' : '' }}>Frozen</option>
+                                    <option value="blocked" {{ $user->status == 'blocked' ? 'selected' : '' }}>Blocked</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="mb-4">
-                            <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                            <select name="status" id="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                <option value="active" {{ $user->status == 'active' ? 'selected' : '' }}>Active</option>
-                                <option value="frozen" {{ $user->status == 'frozen' ? 'selected' : '' }}>Frozen</option>
-                                <option value="blocked" {{ $user->status == 'blocked' ? 'selected' : '' }}>Blocked</option>
-                            </select>
+                        <!-- NEW CARD: Investment Portfolio -->
+                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">Investment Portfolio</h3>
+
+                            <div class="mb-4">
+                                <label for="total_invested" class="block text-sm font-medium text-gray-700">Total Invested (GHS)</label>
+                                <input type="number" name="total_invested" id="total_invested" step="0.01" value="{{ $user->total_invested }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="active_acres" class="block text-sm font-medium text-gray-700">Active Acres</label>
+                                <input type="number" name="active_acres" id="active_acres" step="0.1" value="{{ $user->active_acres }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="projected_roi" class="block text-sm font-medium text-gray-700">Projected ROI (GHS)</label>
+                                <input type="number" name="projected_roi" id="projected_roi" step="0.01" value="{{ $user->projected_roi }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
                         </div>
 
-                        <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+                        <!-- Global Save Button -->
+                        <button type="submit" class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Save Changes
                         </button>
-                    </form>
-                </div>
 
-            </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 </x-app-layout>
