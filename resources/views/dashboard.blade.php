@@ -71,14 +71,18 @@
                 </div>
 
                 {{-- Card 3: Projected ROI --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 relative">
                     <div class="text-gray-500 text-sm font-medium uppercase tracking-wide">Projected Cash Return</div>
-                    <div class="mt-2 flex items-baseline">
+                    <div class="mt-2 flex items-baseline mb-4">
                         <span class="text-3xl font-extrabold text-gray-900">
                             GH₵ {{ number_format(Auth::user()->projected_roi, 2) }}
                         </span>
                         <span class="ml-2 text-sm font-medium text-gray-500">Est. Yield</span>
                     </div>
+                    
+                    <a href="{{ route('withdrawals.create') }}" class="inline-flex items-center px-3 py-1 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 active:bg-green-900 focus:outline-none focus:border-green-900 focus:ring ring-green-300 disabled:opacity-25 transition ease-in-out duration-150">
+                        Request Payout
+                    </a>
                 </div>
 
                 {{-- Card 3: Action Required --}}
@@ -148,6 +152,45 @@
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 uppercase">
                                                 {{ $investment->status }}
                                             </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Section 4: Withdrawal History --}}
+            <h3 class="text-xl font-bold text-amber-900 mb-4 pl-2 border-l-4 border-yellow-500 mt-8"> Withdrawal History</h3>
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-8">
+                @if(Auth::user()->withdrawals->isEmpty())
+                    <div class="p-6 text-center text-gray-500">
+                        No withdrawal history found.
+                    </div>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach(Auth::user()->withdrawals as $withdrawal)
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $withdrawal->created_at->format('M d, Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">GH₵ {{ number_format($withdrawal->amount, 2) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($withdrawal->status === 'pending')
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                            @elseif($withdrawal->status === 'approved')
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>
+                                            @else
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

@@ -4,6 +4,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\AdminController; // Added to prevent Admin crash
+use App\Http\Controllers\InvestmentPackageController;
+use App\Http\Controllers\WithdrawalController;
+use App\Http\Controllers\AdminWithdrawalController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Config;
@@ -50,6 +53,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     
     // Investment Packages (The Package Factory)
     Route::resource('admin/packages', \App\Http\Controllers\InvestmentPackageController::class)->except(['show', 'edit', 'update']);
+
+    // Admin Withdrawals
+    Route::resource('admin/withdrawals', AdminWithdrawalController::class)->only(['index', 'update']);
+});
+
+// User Withdrawal Routes
+Route::middleware(['auth', 'verified', 'ensure.active'])->group(function () {
+    Route::resource('withdrawals', WithdrawalController::class)->only(['create', 'store']);
 });
 
 // --- Auth Routes (Login/Register) ---
