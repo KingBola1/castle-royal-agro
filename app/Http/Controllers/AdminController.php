@@ -88,13 +88,14 @@ class AdminController extends Controller
 
         return redirect()->back()->with('status', 'Investment added successfully!');
     }
-    // 5. Bulk ROI Adjustment (The Time Machine) -> Converted to Harvest Calculator
+    // 5. Bulk ROI Adjustment (Hybrid: Yield Per Acre OR Financial ROI)
     public function bulkUpdateRoi(Request $request)
     {
         $request->validate([
-            'start_date'      => 'required|date',
-            'end_date'        => 'required|date|after_or_equal:start_date',
-            'profit_per_acre' => 'required|numeric|min:0',
+            'start_date'        => 'required|date',
+            'end_date'          => 'required|date|after_or_equal:start_date',
+            'calculation_method'=> 'required|in:per_acre,percentage',
+            'declared_value'    => 'required|numeric|min:0',
         ]);
 
         // 1. Find Investments in Range
@@ -106,14 +107,21 @@ class AdminController extends Controller
         $count = $investments->count();
         $userIdsToSync = [];
 
-        // 2. Loop & Update (Yield Per Acre Logic)
+        // 2. Loop & Update based on Method
         foreach ($investments as $inv) {
-            // Calculate Profit: Acres * Declared Profit Per Acre
-            $profit = $inv->acres * $request->profit_per_acre;
             
-            // Reverse Calculate ROI % (Profit / Amount * 100)
-            // Add safety check for division by zero (unlikely as amount min is 1)
-            $roi_percent = ($inv->amount > 0) ? ($profit / $inv->amount) * 100 : 0;
+            if ($request->calculation_method === 'percentage') {
+                // Method A: Financial (ROI %)
+                $roi_percent = $request->declared_value;
+                $profit = $inv->amount * ($roi_percent / 100);
+
+            } else {
+                // Method B: Yield (GHS / Acre)
+                $profit = $inv->acres * $request->declared_value;
+                
+                // Back-calculate % for record keeping
+                $roi_percent = ($inv->amount > 0) ? ($profit / $inv->amount) * 100 : 0;
+            }
 
             $inv->roi_percentage = $roi_percent;
             $inv->projected_profit = $profit;
@@ -138,6 +146,6 @@ class AdminController extends Controller
             }
         }
 
-        return redirect()->back()->with('status', "Success! Applied yield of GH₵{$request->profit_per_acre}/acre to {$count} investments.");
+        return redirect()->back()->with('status', "Success! Updated {$count} investments using method: {$request->calculation_method}.");
     }
 }

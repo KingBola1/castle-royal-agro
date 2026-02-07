@@ -17,13 +17,13 @@
                     </div>
                     <div class="ml-3 w-full">
                         <h3 class="text-sm leading-5 font-medium text-yellow-800">
-                            Financial Operations: Harvest Calculator (Yield Per Acre)
+                            Financial Operations: Bulk Investment Adjustment
                         </h3>
                         <div class="mt-2 text-sm leading-5 text-yellow-700">
-                            <p>This will calculate profit based on the Declared Profit per Acre for investments within a specific date range.</p>
+                            <p>Update investments based on Yield (GHS per Acre) OR Financial Rate (ROI %).</p>
                         </div>
                         
-                        <form action="{{ route('admin.investments.bulk-update') }}" method="POST" class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                        <form action="{{ route('admin.investments.bulk-update') }}" method="POST" class="mt-4 grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
                             @csrf
                             <div>
                                 <label for="start_date" class="block text-xs font-bold text-gray-700 uppercase">Start Date</label>
@@ -34,12 +34,19 @@
                                 <input type="date" name="end_date" required class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             </div>
                             <div>
-                                <label for="profit_per_acre" class="block text-xs font-bold text-gray-700 uppercase">Declared Profit Per Acre (GHS)</label>
-                                <input type="number" name="profit_per_acre" step="0.01" required placeholder="e.g. 1200 (GHS per acre)" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                <label for="calculation_method" class="block text-xs font-bold text-gray-700 uppercase">Method</label>
+                                <select name="calculation_method" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                    <option value="per_acre">Yield (GHS/Acre)</option>
+                                    <option value="percentage">Financial (ROI %)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="declared_value" class="block text-xs font-bold text-gray-700 uppercase">Declared Value</label>
+                                <input type="number" name="declared_value" step="0.01" required placeholder="Amount (GHS) or Rate (%)" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
                             </div>
                             <div>
                                 <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none">
-                                    Apply Yield Updates
+                                    Apply Update
                                 </button>
                             </div>
                         </form>
