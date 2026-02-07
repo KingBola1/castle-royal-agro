@@ -46,12 +46,42 @@ class AdminController extends Controller
         // Explicitly Update Fields
         $user->role = $request->role;
         $user->status = $request->status;
-        $user->total_invested = $request->total_invested;
-        $user->active_acres = $request->active_acres;
-        $user->projected_roi = $request->projected_roi;
-        $user->save(); // Force the write to database
+        
+        // THE FIX: Use 'input' with a default value of 0
+        $user->total_invested = $request->input('total_invested', 0);
+        $user->active_acres = $request->input('active_acres', 0);
+        $user->projected_roi = $request->input('projected_roi', 0);
+
+        $user->save();
 
         return redirect()->route('admin.users.show', $user->id)
             ->with('status', 'User updated successfully!');
+    }
+
+    // 4. Add New Investment (Receipt)
+    public function invest(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $request->validate([
+            'amount' => ['required', 'numeric', 'min:1'],
+            'acres' => ['required', 'numeric', 'min:0.1'],
+        ]);
+
+        // 1. Create Investment Record
+        $user->investments()->create([
+            'amount' => $request->amount,
+            'acres' => $request->acres,
+            'status' => 'active',
+        ]);
+
+        // 2. Increment User Totals
+        $user->increment('total_invested', $request->amount);
+        $user->increment('active_acres', $request->acres);
+        
+        // Simple ROI Logic: Assume 2.5x return for now (can be adjusted)
+        $user->increment('projected_roi', ($request->amount * 2.5));
+
+        return redirect()->back()->with('status', 'Investment transaction added successfully!');
     }
 }

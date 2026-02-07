@@ -99,6 +99,26 @@
                     </div>
                 </div>
             </form>
+            
+            <!-- NEW FORM: Add Transaction -->
+            <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-t-4 border-green-500">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Add New Transaction (Receipt)</h3>
+                <form action="{{ route('admin.users.invest', $user->id) }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    @csrf
+                    <div>
+                        <label for="new_amount" class="block text-sm font-medium text-gray-700">Amount (GHS)</label>
+                        <input type="number" name="amount" id="new_amount" step="0.01" required class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <div>
+                        <label for="new_acres" class="block text-sm font-medium text-gray-700">Acres</label>
+                        <input type="number" name="acres" id="new_acres" step="0.1" required class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-green-500 focus:border-green-500">
+                    </div>
+                    <button type="submit" class="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
+                        Add Transaction
+                    </button>
+                </form>
+            </div>
+
         </div>
     </div>
 </x-app-layout>

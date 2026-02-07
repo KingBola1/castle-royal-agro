@@ -13,6 +13,14 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable;
 
     /**
+     * Get the investments for the user.
+     */
+    public function investments()
+    {
+        return $this->hasMany(Investment::class);
+    }
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
