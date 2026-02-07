@@ -45,7 +45,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::put('/admin/investments/{id}', [AdminController::class, 'updateInvestment'])->name('admin.investments.update');
     Route::delete('/admin/investments/{id}', [AdminController::class, 'destroyInvestment'])->name('admin.investments.destroy');
     
+    
     Route::post('/admin/investments/bulk-update', [AdminController::class, 'bulkUpdateRoi'])->name('admin.investments.bulk-update');
+    
+    // Investment Packages (The Package Factory)
+    Route::resource('admin/packages', \App\Http\Controllers\InvestmentPackageController::class)->except(['show', 'edit', 'update']);
 });
 
 // --- Auth Routes (Login/Register) ---
