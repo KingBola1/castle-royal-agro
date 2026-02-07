@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Request Withdrawal') }}
+            {{ __('Request Payout') }}
         </h2>
     </x-slot>
 
@@ -10,15 +10,15 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     
-                    <div class="mb-4 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <div class="mb-4 bg-blue-50 border-l-4 border-blue-400 p-4">
                         <div class="flex">
                             <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                <svg class="h-5 w-5 text-blue-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
                                 </svg>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm text-yellow-700">
+                                <p class="text-sm text-blue-700">
                                     Available Balance: <span class="font-bold">GH₵ {{ number_format(Auth::user()->projected_roi, 2) }}</span>
                                 </p>
                             </div>
@@ -28,26 +28,38 @@
                     <form method="POST" action="{{ route('withdrawals.store') }}">
                         @csrf
 
-                        <!-- Amount -->
-                        <div>
-                            <x-label for="amount" :value="__('Withdrawal Amount (GHS)')" />
-                            <x-input id="amount" class="block mt-1 w-full" type="number" name="amount" :value="old('amount')" required step="0.01" min="1" max="{{ Auth::user()->projected_roi }}" autofocus />
-                            @error('amount') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <div class="mb-4">
+                            <label for="amount" class="block font-medium text-sm text-gray-700">Withdrawal Amount (GHS)</label>
+                            <input id="amount" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                                   type="number" 
+                                   name="amount" 
+                                   value="{{ old('amount') }}" 
+                                   required 
+                                   autofocus />
+                            @error('amount')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
-                        <!-- Payment Details -->
-                        <div class="mt-4">
-                            <x-label for="payment_details" :value="__('Payment Details (E.g. Momo Number & Name)')" />
-                            <textarea id="payment_details" name="payment_details" rows="4" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>{{ old('payment_details') }}</textarea>
-                             @error('payment_details') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        <div class="mb-4">
+                            <label for="payment_details" class="block font-medium text-sm text-gray-700">Payment Details (MoMo Name & Number)</label>
+                            <textarea id="payment_details" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
+                                      name="payment_details" 
+                                      rows="3" 
+                                      required 
+                                      placeholder="e.g. MTN Momo - John Mayer - 0244123456">{{ old('payment_details') }}</textarea>
+                            @error('payment_details')
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <div class="flex items-center justify-end mt-4">
-                            <x-button class="ml-4">
-                                {{ __('Submit Request') }}
-                            </x-button>
+                            <button type="submit" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 active:bg-gray-900 focus:outline-none focus:border-gray-900 focus:ring ring-gray-300 disabled:opacity-25 transition ease-in-out duration-150">
+                                Submit Request
+                            </button>
                         </div>
                     </form>
+
                 </div>
             </div>
         </div>
