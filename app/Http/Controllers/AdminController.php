@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Investment;
+use App\Models\InvestmentPackage;
+use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -21,7 +24,11 @@ class AdminController extends Controller
     public function show($id)
     {
         $user = User::findOrFail($id);
-        return view('admin.users.show', compact('user'));
+        $packages = InvestmentPackage::all();
+        $investments = $user->investments()->orderBy('created_at', 'desc')->get(); // Fetch investments
+        $auditLogs = AuditLog::where('user_id', $user->id)->latest()->take(5)->get(); // Fetch logs
+
+        return view('admin.users.show', compact('user', 'packages', 'investments', 'auditLogs'));
     }
 
     // 3. Update the User (THE FIX)
@@ -43,6 +50,10 @@ class AdminController extends Controller
             'projected_roi' => ['nullable', 'numeric', 'min:0'],
         ]);
 
+        // Capture Old State for Audit
+        $oldRole = $user->role;
+        $oldStatus = $user->status;
+
         // Explicitly Update Fields
         $user->role = $request->role;
         $user->status = $request->status;
@@ -53,6 +64,24 @@ class AdminController extends Controller
         $user->projected_roi = $request->input('projected_roi', 0);
 
         $user->save();
+
+        // Audit Log if Role or Status Changed
+        if ($oldRole !== $user->role) {
+            AuditLog::create([
+                'user_id' => $user->id,
+                'admin_id' => Auth::id(),
+                'action' => 'Role Updated',
+                'details' => "Changed role from $oldRole to {$user->role}",
+            ]);
+        }
+        if ($oldStatus !== $user->status) {
+            AuditLog::create([
+                'user_id' => $user->id,
+                'admin_id' => Auth::id(),
+                'action' => 'Status Updated',
+                'details' => "Changed status from $oldStatus to {$user->status}",
+            ]);
+        }
 
         return redirect()->route('admin.users.show', $user->id)
             ->with('status', 'User updated successfully!');
@@ -67,17 +96,20 @@ class AdminController extends Controller
             'amount' => 'required|numeric|min:0',
             'acres' => 'required|numeric|min:0',
             'roi_percentage' => 'required|numeric|min:0',
+            'projected_profit' => 'nullable|numeric|min:0', // Should be calculated, but allow override if needed? No, calculate.
         ]);
 
-        // 1. Create the Receipt
-        // Calculate Profit based on Input Percentage
+        // 1. Calculate Profit based on Input Percentage
+        // Note: Adding support for 'projected_profit' input if available (e.g. from package logic), otherwise calc.
+        // Actually, let's strictly calculate based on ROI % provided to ensure consistency.
         $profit = $request->amount * ($request->roi_percentage / 100);
 
-        $user->investments()->create([
+        // 2. Create the Receipt
+        $investment = $user->investments()->create([
             'amount' => $request->amount,
             'acres' => $request->acres,
-            'roi_percentage' => $request->roi_percentage, // SAVE THE %
-            'projected_profit' => $profit,                // SAVE THE PROFIT
+            'roi_percentage' => $request->roi_percentage, 
+            'projected_profit' => $profit,
             'status' => 'active',
         ]);
 
@@ -86,9 +118,91 @@ class AdminController extends Controller
         $user->increment('active_acres', $request->acres);
         $user->increment('projected_roi', ($request->amount + $profit)); // Total Cash Return
 
+        // 4. Audit Log
+        AuditLog::create([
+            'user_id' => $user->id,
+            'admin_id' => Auth::id(),
+            'action' => 'Investment Added',
+            'details' => "Added Investment of GH₵ {$request->amount} ({$request->acres} acres).",
+        ]);
+
         return redirect()->back()->with('status', 'Investment added successfully!');
     }
-    // 5. Bulk ROI Adjustment (Hybrid: Yield Per Acre OR Financial ROI)
+
+    // 6. Update Existing Investment
+    public function updateInvestment(Request $request, $id)
+    {
+        $investment = Investment::findOrFail($id);
+        $user = $investment->user;
+
+        $request->validate([
+            'amount' => 'required|numeric|min:0',
+            'acres' => 'required|numeric|min:0',
+            'roi_percentage' => 'required|numeric|min:0',
+        ]);
+
+        // Calculate differences
+        $amountDiff = $request->amount - $investment->amount;
+        $acresDiff = $request->acres - $investment->acres;
+        
+        // New Profit
+        $newProfit = $request->amount * ($request->roi_percentage / 100);
+        $oldProfit = $investment->projected_profit;
+        $profitDiff = $newProfit - $oldProfit;
+        
+        // Update Investment
+        $investment->update([
+            'amount' => $request->amount,
+            'acres' => $request->acres,
+            'roi_percentage' => $request->roi_percentage,
+            'projected_profit' => $newProfit,
+        ]);
+
+        // Update User Totals
+        if ($amountDiff != 0) $user->increment('total_invested', $amountDiff);
+        if ($acresDiff != 0) $user->increment('active_acres', $acresDiff);
+        
+        // Update Projected ROI (Principal + Profit)
+        // Total Diff = (NewPrincipal + NewProfit) - (OldPrincipal + OldProfit)
+        //            = (AmountDiff) + (ProfitDiff)
+        $totalRoiDiff = $amountDiff + $profitDiff;
+        if ($totalRoiDiff != 0) $user->increment('projected_roi', $totalRoiDiff);
+
+        // Audit Log
+        AuditLog::create([
+            'user_id' => $user->id,
+            'admin_id' => Auth::id(),
+            'action' => 'Investment Updated',
+            'details' => "Updated Investment #{$investment->id}. Amount: {$amountDiff}, Acres: {$acresDiff}.",
+        ]);
+
+        return redirect()->back()->with('status', 'Investment updated successfully!');
+    }
+
+    // 7. Delete Investment (Soft Delete)
+    public function destroyInvestment($id)
+    {
+        $investment = Investment::findOrFail($id);
+        $user = $investment->user;
+
+        // Recalculate User Totals (Subtract)
+        $user->decrement('total_invested', $investment->amount);
+        $user->decrement('active_acres', $investment->acres);
+        $user->decrement('projected_roi', ($investment->amount + $investment->projected_profit));
+
+        // Audit Log
+        AuditLog::create([
+            'user_id' => $user->id,
+            'admin_id' => Auth::id(),
+            'action' => 'Investment Deleted',
+            'details' => "Deleted Investment #{$investment->id} of GH₵ {$investment->amount}.",
+        ]);
+
+        $investment->delete();
+
+        return redirect()->back()->with('status', 'Investment deleted (soft) and totals adjusted.');
+    }
+    // 8. Bulk ROI Adjustment (Hybrid: Yield Per Acre OR Financial ROI)
     public function bulkUpdateRoi(Request $request)
     {
         $request->validate([
