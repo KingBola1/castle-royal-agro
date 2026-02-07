@@ -88,4 +88,52 @@ class AdminController extends Controller
 
         return redirect()->back()->with('status', 'Investment added successfully!');
     }
+    // 5. Bulk ROI Adjustment (The Time Machine)
+    public function bulkUpdateRoi(Request $request)
+    {
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after_or_equal:start_date',
+            'new_roi'    => 'required|numeric|min:0',
+        ]);
+
+        // 1. Find Investments in Range
+        $investments = \App\Models\Investment::whereBetween('created_at', [
+            $request->start_date . ' 00:00:00',
+            $request->end_date . ' 23:59:59'
+        ])->get();
+
+        $count = $investments->count();
+        $userIdsToSync = [];
+
+        // 2. Loop & Update
+        foreach ($investments as $inv) {
+            $inv->roi_percentage = $request->new_roi;
+            $inv->projected_profit = $inv->amount * ($request->new_roi / 100);
+            $inv->save();
+
+            if (!in_array($inv->user_id, $userIdsToSync)) {
+                $userIdsToSync[] = $inv->user_id;
+            }
+        }
+
+        // 3. Sync Users
+        foreach ($userIdsToSync as $userId) {
+            $user = User::find($userId);
+            if ($user) {
+                // Sum of all projected profits for this user
+                $totalProfit = $user->investments()->sum('projected_profit');
+                $user->projected_roi = $totalProfit; // Assuming 'projected_roi' stores the TOTAL sum
+                // Note: If projected_roi is expected to be Principal + Profit, then:
+                // $totalInvested = $user->investments()->sum('amount');
+                // $user->projected_roi = $totalInvested + $totalProfit;
+                // Based on previous step, we treated it as "Projected Cash Return" = Principal + Profit.
+                 $totalInvested = $user->investments()->sum('amount');
+                 $user->projected_roi = $totalInvested + $totalProfit;
+                $user->save();
+            }
+        }
+
+        return redirect()->back()->with('status', "Success! Updated {$count} investments and synced user totals.");
+    }
 }

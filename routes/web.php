@@ -40,6 +40,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/admin/users/{id}', [AdminController::class, 'show'])->name('admin.users.show');
     Route::put('/admin/users/{id}', [AdminController::class, 'update'])->name('admin.users.update');
     Route::post('/admin/users/{id}/invest', [AdminController::class, 'invest'])->name('admin.users.invest');
+    Route::post('/admin/investments/bulk-update', [AdminController::class, 'bulkUpdateRoi'])->name('admin.investments.bulk-update');
 });
 
 // --- Auth Routes (Login/Register) ---
