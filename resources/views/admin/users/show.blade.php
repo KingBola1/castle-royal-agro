@@ -7,11 +7,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Use a form that wraps the right column -->
-            <form action="{{ route('admin.users.update', $user->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <!-- LEFT COLUMN: Read-Only Info -->
@@ -46,76 +41,86 @@
 
                     <!-- RIGHT COLUMN: Editable Actions -->
                     <div class="space-y-6">
-                        
-                        <!-- Account Actions Card -->
-                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Account Actions</h3>
-                            
-                            <div class="mb-4">
-                                <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                                <select name="role" id="role" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                    <option value="investor" {{ $user->role == 'investor' ? 'selected' : '' }}>Investor</option>
-                                    <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                                    <option value="super_admin" {{ $user->role == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
-                                </select>
-                                <p class="text-xs text-gray-500 mt-1">Current Role: <strong>{{ $user->role }}</strong></p>
-                            </div>
 
-                            <div class="mb-4">
-                                <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
-                                <select name="status" id="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                    <option value="active" {{ $user->status == 'active' ? 'selected' : '' }}>Active</option>
-                                    <option value="frozen" {{ $user->status == 'frozen' ? 'selected' : '' }}>Frozen</option>
-                                    <option value="blocked" {{ $user->status == 'blocked' ? 'selected' : '' }}>Blocked</option>
-                                </select>
-                            </div>
+                        <!-- ACCESS TOOLS (Magic Link) - Independent Form -->
+                        <div class="p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <h3 class="text-lg font-medium text-gray-900 mb-4">🔑 Access Tools</h3>
 
-                            <div class="mt-6 border-t pt-4">
-                                <form action="{{ route('admin.users.reset-password', $user->id) }}" method="POST" class="mt-4 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-600 mb-2">Generate a temporary link to log this user in automatically (valid for 30 mins).</p>
+                                <form action="{{ route('admin.users.magic-link', $user->id) }}" method="POST">
                                     @csrf
-                                    <label class="block font-bold text-sm text-gray-700 mb-2">⚡ Manual Password Override</label>
-                                    <div class="flex gap-2">
-                                        <input type="text" name="new_password" required placeholder="Type password here (e.g. Castle2026)" 
-                                            class="block w-full border-gray-300 rounded-md shadow-sm focus:border-red-500 focus:ring-red-500 sm:text-sm">
-
-                                        <button type="submit" onclick="return confirm('Are you sure? This will immediately change the user\'s password.')"
-                                                class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 transition">
-                                            Set Password
-                                        </button>
-                                    </div>
-                                    <p class="text-xs text-red-500 mt-2">Warning: This will log the user out of all devices.</p>
+                                    <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:ring focus:ring-indigo-200 active:bg-indigo-600 transition">
+                                        Generate Magic Link
+                                    </button>
                                 </form>
                             </div>
+
+                            @if(session('success') && str_contains(session('success'), 'http'))
+                                <div class="bg-green-50 p-4 rounded-md border border-green-200 mb-4 break-all">
+                                    <p class="text-xs font-bold text-green-800 uppercase mb-1">Copy and Send this Link:</p>
+                                    <code class="text-sm text-indigo-700 select-all">{{ session('success') }}</code>
+                                </div>
+                            @endif
                         </div>
+                        
+                        <!-- MAIN UPDATE FORM -->
+                        <form action="{{ route('admin.users.update', $user->id) }}" method="POST" class="space-y-6">
+                            @csrf
+                            @method('PUT')
 
-                        <!-- NEW CARD: Investment Portfolio -->
-                        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                            <h3 class="text-lg font-medium text-gray-900 mb-4">Investment Portfolio</h3>
+                            <!-- Account Actions Card (Role/Status) -->
+                            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">Account Actions</h3>
+                                
+                                <div class="mb-4">
+                                    <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+                                    <select name="role" id="role" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                        <option value="investor" {{ $user->role == 'investor' ? 'selected' : '' }}>Investor</option>
+                                        <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
+                                        <option value="super_admin" {{ $user->role == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
+                                    </select>
+                                    <p class="text-xs text-gray-500 mt-1">Current Role: <strong>{{ $user->role }}</strong></p>
+                                </div>
 
-                            <div class="mb-4">
-                                <label for="total_invested" class="block text-sm font-medium text-gray-700">Total Invested (GHS)</label>
-                                <input type="number" name="total_invested" id="total_invested" step="0.01" value="{{ $user->total_invested }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                                <div class="mb-4">
+                                    <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
+                                    <select name="status" id="status" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                        <option value="active" {{ $user->status == 'active' ? 'selected' : '' }}>Active</option>
+                                        <option value="frozen" {{ $user->status == 'frozen' ? 'selected' : '' }}>Frozen</option>
+                                        <option value="blocked" {{ $user->status == 'blocked' ? 'selected' : '' }}>Blocked</option>
+                                    </select>
+                                </div>
                             </div>
 
-                            <div class="mb-4">
-                                <label for="active_acres" class="block text-sm font-medium text-gray-700">Active Acres</label>
-                                <input type="number" name="active_acres" id="active_acres" step="0.1" value="{{ $user->active_acres }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                            <!-- Investment Portfolio -->
+                            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
+                                <h3 class="text-lg font-medium text-gray-900 mb-4">Investment Portfolio</h3>
+
+                                <div class="mb-4">
+                                    <label for="total_invested" class="block text-sm font-medium text-gray-700">Total Invested (GHS)</label>
+                                    <input type="number" name="total_invested" id="total_invested" step="0.01" value="{{ $user->total_invested }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="active_acres" class="block text-sm font-medium text-gray-700">Active Acres</label>
+                                    <input type="number" name="active_acres" id="active_acres" step="0.1" value="{{ $user->active_acres }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <div class="mb-4">
+                                    <label for="projected_roi" class="block text-sm font-medium text-gray-700">Projected ROI (GHS)</label>
+                                    <input type="number" name="projected_roi" id="projected_roi" step="0.01" value="{{ $user->projected_roi }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
                             </div>
 
-                            <div class="mb-4">
-                                <label for="projected_roi" class="block text-sm font-medium text-gray-700">Projected ROI (GHS)</label>
-                                <input type="number" name="projected_roi" id="projected_roi" step="0.01" value="{{ $user->projected_roi }}" class="mt-1 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-                        </div>
-
-                        <!-- Global Save Button -->
-                        <button type="submit" class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                            Save Changes
-                        </button>
+                            <!-- Global Save Button -->
+                            <button type="submit" class="w-full inline-flex justify-center py-3 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                Save Changes
+                            </button>
+                        </form>
 
                     </div>
                 </div>
-            </form>
             
             {{-- Add New Transaction --}}
             <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-t-4 border-green-500">

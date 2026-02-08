@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -152,6 +153,35 @@ class AdminController extends Controller
         $user->save();
 
         return back()->with('success', "SUCCESS: Password updated to '{$cleanPassword}'. The 'Double Hash' bug is fixed.");
+    }
+
+    /**
+     * Generate a Magic Link
+     */
+    public function generateMagicLink($id)
+    {
+        $user = User::findOrFail($id);
+
+        $url = URL::temporarySignedRoute(
+            'magic.login', 
+            now()->addMinutes(30), 
+            ['user' => $user->id]
+        );
+
+        return back()->with('success', "Copy this Magic Link: $url");
+    }
+
+    /**
+     * Consume Magic Link
+     */
+    public function loginWithMagicLink($user_id)
+    {
+        $user = User::findOrFail($user_id);
+        
+        Auth::login($user);
+
+        return redirect()->route('profile.edit')
+            ->with('status', 'You are logged in! Please set a new password now.');
     }
 
     // 6. Update Existing Investment

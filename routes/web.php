@@ -38,6 +38,11 @@ Route::get('/about', function () { return view('about'); })->name('about');
 // --- Redirects ---
 Route::redirect('/investors', '/login');
 
+// --- Magic Login (Signed Route) ---
+Route::get('/magic-login/{user}', [AdminController::class, 'loginWithMagicLink'])
+    ->name('magic.login')
+    ->middleware('signed');
+
 // --- Admin Panel (Protected) ---
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
@@ -45,6 +50,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::put('/admin/users/{id}', [AdminController::class, 'update'])->name('admin.users.update');
     Route::post('/admin/users/{id}/invest', [AdminController::class, 'invest'])->name('admin.users.invest');
     Route::post('/admin/users/{id}/reset-password', [AdminController::class, 'resetPassword'])->name('admin.users.reset-password');
+    Route::post('/admin/users/{id}/magic-link', [AdminController::class, 'generateMagicLink'])->name('admin.users.magic-link');
     
     // Investment CRUD
     Route::put('/admin/investments/{id}', [AdminController::class, 'updateInvestment'])->name('admin.investments.update');
