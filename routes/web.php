@@ -38,10 +38,7 @@ Route::get('/about', function () { return view('about'); })->name('about');
 // --- Redirects ---
 Route::redirect('/investors', '/login');
 
-// Use standard Laravel signature validation
-Route::get('/magic-login/{user}', [App\Http\Controllers\AdminController::class, 'loginWithMagicLink'])
-    ->name('magic.login')
-    ->middleware('signed');
+
 
 // --- Admin Panel (Protected) ---
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
@@ -144,3 +141,23 @@ Route::get('/force-password-fix', function () {
            "<p>If Length is < 60, your database column is too short.</p>" .
            "<p>If Length is 60+ but Mismatch, your App Key or Hashing Config might be inconsistent.</p>";
 });
+
+// --- GLOBAL MAGIC LINK ROUTE (Must be outside all groups) ---
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+
+Route::get('/magic-login/{user}', function (Request $request, $id) {
+    // 1. Verify Signature
+    if (! $request->hasValidSignature()) {
+        abort(403, 'This link is invalid or has expired.');
+    }
+
+    // 2. Login User
+    $user = User::findOrFail($id);
+    Auth::login($user);
+
+    // 3. Redirect
+    return redirect('/dashboard')->with('status', 'Magic Login Successful! Welcome back.');
+})->name('magic.login');
