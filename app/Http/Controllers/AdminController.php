@@ -9,6 +9,7 @@ use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
@@ -138,12 +139,16 @@ class AdminController extends Controller
     public function resetPassword($id)
     {
         $user = User::findOrFail($id);
-        
-        // Force update the password to 'password123'
-        $user->password = Hash::make('password123');
+
+        // Generate a random 10-character password
+        $newPassword = Str::random(10);
+
+        // Hash and Save
+        $user->password = Hash::make($newPassword);
         $user->save();
 
-        return back()->with('success', 'Password has been reset to: password123');
+        // Show the RAW password to the Admin so they can copy it
+        return back()->with('success', "Password reset successfully. copy this temporary password: " . $newPassword);
     }
 
     // 6. Update Existing Investment
