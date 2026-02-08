@@ -9,6 +9,16 @@
     <div class="py-12 min-h-screen relative bg-cover bg-center bg-fixed" 
          style="background-image: url('{{ asset('images/backgrounds/moringa_pattern.png') }}');">
         
+        {{-- Success Message --}}
+        @if (session('status'))
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-4 relative z-10">
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Success!</strong>
+                    <span class="block sm:inline">{{ session('status') }}</span>
+                </div>
+            </div>
+        @endif
+
         {{-- Overlay to ensure text readability --}}
         <div class="absolute inset-0 bg-white/80 z-0"></div>
 

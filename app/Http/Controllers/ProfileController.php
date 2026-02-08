@@ -50,7 +50,7 @@ class ProfileController extends Controller
             'payment_details' => $request->payment_details
         ]);
 
-        return Redirect::route('profile.edit')->with('status', 'payment-updated');
+        return Redirect::route('dashboard')->with('status', 'Wallet details updated successfully!');
     }
 
     /**
