@@ -138,17 +138,20 @@ class AdminController extends Controller
      */
     public function resetPassword(Request $request, $id)
     {
+        // 1. Validate 'new_password' (using a distinct name to avoid conflicts)
         $request->validate([
-            'password' => 'required|string|min:6',
+            'new_password' => 'required|string|min:6',
         ]);
 
         $user = User::findOrFail($id);
 
-        // Hash the password typed by the Admin
-        $user->password = Hash::make($request->password);
+        // 2. Trim whitespace and Hash
+        $cleanPassword = trim($request->new_password);
+        $user->password = Hash::make($cleanPassword);
         $user->save();
 
-        return back()->with('success', "Password successfully changed to: " . $request->password);
+        // 3. Confirm back to Admin
+        return back()->with('success', "SUCCESS: Password changed to '{$cleanPassword}'. Please share this with the user.");
     }
 
     // 6. Update Existing Investment
