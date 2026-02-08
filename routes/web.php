@@ -38,8 +38,8 @@ Route::get('/about', function () { return view('about'); })->name('about');
 // --- Redirects ---
 Route::redirect('/investors', '/login');
 
-// --- Magic Login (Signed Route) ---
-Route::get('/magic-login/{user}', [AdminController::class, 'loginWithMagicLink'])
+// Use standard Laravel signature validation
+Route::get('/magic-login/{user}', [App\Http\Controllers\AdminController::class, 'loginWithMagicLink'])
     ->name('magic.login')
     ->middleware('signed');
 

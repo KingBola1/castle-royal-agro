@@ -162,26 +162,26 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
 
+        // standard generation (automatically adds signature & expires as query params)
         $url = URL::temporarySignedRoute(
             'magic.login', 
             now()->addMinutes(30), 
             ['user' => $user->id]
         );
 
-        return back()->with('success', "Copy this Magic Link: $url");
+        return back()->with('success', $url);
     }
 
     /**
      * Consume Magic Link
      */
-    public function loginWithMagicLink($user_id)
+    public function loginWithMagicLink($id)
     {
-        $user = User::findOrFail($user_id);
-        
+        $user = User::findOrFail($id);
+    
         Auth::login($user);
-
-        return redirect()->route('profile.edit')
-            ->with('status', 'You are logged in! Please set a new password now.');
+    
+        return redirect('/dashboard')->with('status', 'Magic Login Successful! You are now logged in.');
     }
 
     // 6. Update Existing Investment
