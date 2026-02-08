@@ -144,15 +144,16 @@ class AdminController extends Controller
             'new_password' => 'required|string|min:6',
         ]);
 
-        $user = User::findOrFail($id);
-
-        // FIX: Remove Hash::make() because User model has 'password' => 'hashed' cast
-        // This prevents "Double Hashing" which was causing the login failure.
         $cleanPassword = trim($request->new_password);
-        $user->password = $cleanPassword; 
-        $user->save();
+        
+        // DIRECT DB UPDATE (Bypass Model/Mutators)
+        DB::table('users')
+            ->where('id', $id)
+            ->update([
+                'password' => Hash::make($cleanPassword)
+            ]);
 
-        return back()->with('success', "SUCCESS: Password updated to '{$cleanPassword}'. The 'Double Hash' bug is fixed.");
+        return back()->with('success', "SUCCESS: Password force-updated to '{$cleanPassword}'.");
     }
 
     /**
