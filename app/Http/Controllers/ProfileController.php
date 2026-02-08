@@ -46,9 +46,11 @@ class ProfileController extends Controller
             'payment_details' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $request->user()->update($validated);
+        $request->user()->update([
+            'payment_details' => $request->payment_details
+        ]);
 
-        return Redirect::route('profile.edit')->with('status', 'Payment details updated.');
+        return Redirect::route('profile.edit')->with('status', 'payment-updated');
     }
 
     /**
