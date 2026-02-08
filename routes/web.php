@@ -122,14 +122,19 @@ Route::get('/force-password-fix', function () {
         
     // 2. Verify immediately
     $updatedUser = Illuminate\Support\Facades\DB::table('users')->where('email', $email)->first();
-    $check = Illuminate\Support\Facades\Hash::check($newPass, $updatedUser->password);
+    $storedHash = $updatedUser->password;
+    $check = Illuminate\Support\Facades\Hash::check($newPass, $storedHash);
+    $driver = config('hashing.driver');
+    $len = strlen($storedHash);
     
-    return "<h1>Password Reset Debug</h1>" .
-           "<p>User ID: {$user->id}</p>" .
-           "<p>Target Pwd: $newPass</p>" .
-           "<p>Old Hash (start): " . substr($user->password, 0, 10) . "...</p>" .
-           "<p>New Hash (start): " . substr($updatedUser->password, 0, 10) . "...</p>" .
-           "<h3>Hash Check Result: " . ($check ? '<span style="color:green">MATCH (SUCCESS)</span>' : '<span style="color:red">FAIL</span>') . "</h3>" .
-           "<p>If this says MATCH, try logging in with <br><strong>Email:</strong> $email <br><strong>Password:</strong> $newPass</p>" .
-           "<br><a href='/login'>Go to Login</a>";
+    return "<h1>Deep Diagnostic</h1>" .
+           "<p><strong>Hashing Driver:</strong> $driver</p>" .
+           "<p><strong>Stored Hash Length:</strong> $len chars (Should be >= 60)</p>" .
+           "<hr>" .
+           "<p><strong>Target Password:</strong> $newPass</p>" .
+           "<p><strong>Stored Hash:</strong> $storedHash</p>" .
+           "<hr>" .
+           "<h3>Hash::check Result: " . ($check ? '<span style="color:green">YES - MATCH</span>' : '<span style="color:red; font-size: 2em;">NO - MISMATCH</span>') . "</h3>" .
+           "<p>If Length is < 60, your database column is too short.</p>" .
+           "<p>If Length is 60+ but Mismatch, your App Key or Hashing Config might be inconsistent.</p>";
 });
