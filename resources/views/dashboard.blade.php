@@ -101,8 +101,38 @@
                 </div>
             </div>
 
-            {{-- Section 3: Investment History --}}
-            <h3 class="text-xl font-bold text-amber-900 mb-4 pl-2 border-l-4 border-green-700"> Your Investment History</h3>
+            {{-- Section 3: Wallet Settings --}}
+            <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        💼 Wallet Settings
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <form method="post" action="{{ route('profile.payment-details') }}">
+                            @csrf
+                            @method('patch')
+
+                            <label for="payment_details" class="block font-medium text-sm text-gray-700">
+                                Default Payment Details (Auto-Fill for Withdrawals)
+                            </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                                <textarea id="payment_details" name="payment_details" rows="2" 
+                                    class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300" 
+                                    placeholder="e.g. MTN MoMo - 0244 000 000 - John Doe">{{ Auth::user()->payment_details }}</textarea>
+                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-r-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+                                    Save
+                                </button>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500">
+                                Enter your MoMo Name & Number here. Next time you request a payout, this will be typed for you automatically!
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Section 4: Investment History --}}
+            <h3 class="text-xl font-bold text-amber-900 mb-4 pl-2 border-l-4 border-green-700 mt-8"> Your Investment History</h3>
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
                 @if($investments->isEmpty())
                     <div class="p-12 text-center">
