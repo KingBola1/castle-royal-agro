@@ -64,6 +64,9 @@
                             @endif
                         </div>
                         
+                        <!-- HIDDEN FORM FOR PASSWORD RESET (to avoid nesting) -->
+                        <form id="password-reset-form" action="{{ route('admin.users.reset-password', $user->id) }}" method="POST" class="hidden">@csrf</form>
+
                         <!-- MAIN UPDATE FORM -->
                         <form action="{{ route('admin.users.update', $user->id) }}" method="POST" class="space-y-6">
                             @csrf
@@ -73,12 +76,6 @@
                             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">Account Actions</h3>
                                 
-                                <div class="mb-4">
-                                    <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
-                                    <select name="role" id="role" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                                        <option value="investor" {{ $user->role == 'investor' ? 'selected' : '' }}>Investor</option>
-                                        <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Admin</option>
-                                        <option value="super_admin" {{ $user->role == 'super_admin' ? 'selected' : '' }}>Super Admin</option>
                                     </select>
                                     <p class="text-xs text-gray-500 mt-1">Current Role: <strong>{{ $user->role }}</strong></p>
                                 </div>
@@ -90,6 +87,19 @@
                                         <option value="frozen" {{ $user->status == 'frozen' ? 'selected' : '' }}>Frozen</option>
                                         <option value="blocked" {{ $user->status == 'blocked' ? 'selected' : '' }}>Blocked</option>
                                     </select>
+                                </div>
+                                    </select>
+                                </div>
+                                
+                                <div class="mt-6 border-t border-gray-200 pt-4">
+                                    <label for="new_password" class="block text-sm font-medium text-red-700">Manual Password Reset</label>
+                                    <div class="mt-1 flex rounded-md shadow-sm">
+                                        <input type="text" name="new_password" form="password-reset-form" id="new_password" required minlength="6" class="focus:ring-red-500 focus:border-red-500 flex-1 block w-full rounded-l-md sm:text-sm border-gray-300" placeholder="New Password">
+                                        <button type="submit" form="password-reset-form" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-r-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                                            Reset
+                                        </button>
+                                    </div>
+                                    <p class="mt-1 text-xs text-red-500">Warning: Immediate override.</p>
                                 </div>
                             </div>
 
