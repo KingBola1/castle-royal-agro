@@ -44,6 +44,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/admin/users/{id}', [AdminController::class, 'show'])->name('admin.users.show');
     Route::put('/admin/users/{id}', [AdminController::class, 'update'])->name('admin.users.update');
     Route::post('/admin/users/{id}/invest', [AdminController::class, 'invest'])->name('admin.users.invest');
+    Route::post('/admin/users/{id}/reset-password', [AdminController::class, 'resetPassword'])->name('admin.users.reset-password');
     
     // Investment CRUD
     Route::put('/admin/investments/{id}', [AdminController::class, 'updateInvestment'])->name('admin.investments.update');

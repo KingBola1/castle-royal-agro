@@ -131,6 +131,20 @@ class AdminController extends Controller
         return redirect()->back()->with('status', 'Investment added successfully!');
     }
 
+    /**
+     * Force reset a user's password.
+     */
+    public function resetPassword($id)
+    {
+        $user = User::findOrFail($id);
+        
+        $user->update([
+            'password' => \Illuminate\Support\Facades\Hash::make('CastleRoyal2026!')
+        ]);
+
+        return redirect()->back()->with('status', "Password reset to 'CastleRoyal2026!'");
+    }
+
     // 6. Update Existing Investment
     public function updateInvestment(Request $request, $id)
     {
