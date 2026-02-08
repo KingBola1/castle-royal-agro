@@ -103,26 +103,33 @@ Route::get('/debug-smtp', function () {
            "<p><strong>Username:</strong> " . $config['username'] . "</p>";
 });
 
+
 // Route for Force Password Reset (Temporary Debugging)
 Route::get('/force-password-fix', function () {
-    $email = 'johnmtec1@gmail.com';
+    $email = 'johnmtec1@gmail.com'; // Hardcoded test email
     $newPass = 'Castle2026';
     
-    // 1. Check if user exists
-    $count = Illuminate\Support\Facades\DB::table('users')->where('email', $email)->count();
+    $user = Illuminate\Support\Facades\DB::table('users')->where('email', $email)->first();
     
-    if ($count == 0) {
-        return "ERROR: User with email $email not found!";
+    if (!$user) {
+        return "ERROR: User $email not found.";
     }
 
-    if ($count > 1) {
-        return "CRITICAL ERROR: Found $count users with this email. Duplicate accounts exist!";
-    }
-
-    // 2. Force Update (Raw SQL Query)
+    // 1. Force update with manually hashed password (bypassing model events/casts)
     Illuminate\Support\Facades\DB::table('users')
         ->where('email', $email)
         ->update(['password' => Illuminate\Support\Facades\Hash::make($newPass)]);
-
-    return "SUCCESS: Password for $email has been force-reset to: $newPass <br> <a href='/login'>Go to Login</a>";
+        
+    // 2. Verify immediately
+    $updatedUser = Illuminate\Support\Facades\DB::table('users')->where('email', $email)->first();
+    $check = Illuminate\Support\Facades\Hash::check($newPass, $updatedUser->password);
+    
+    return "<h1>Password Reset Debug</h1>" .
+           "<p>User ID: {$user->id}</p>" .
+           "<p>Target Pwd: $newPass</p>" .
+           "<p>Old Hash (start): " . substr($user->password, 0, 10) . "...</p>" .
+           "<p>New Hash (start): " . substr($updatedUser->password, 0, 10) . "...</p>" .
+           "<h3>Hash Check Result: " . ($check ? '<span style="color:green">MATCH (SUCCESS)</span>' : '<span style="color:red">FAIL</span>') . "</h3>" .
+           "<p>If this says MATCH, try logging in with <br><strong>Email:</strong> $email <br><strong>Password:</strong> $newPass</p>" .
+           "<br><a href='/login'>Go to Login</a>";
 });
