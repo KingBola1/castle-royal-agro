@@ -47,7 +47,7 @@
                                       name="payment_details" 
                                       rows="3" 
                                       required 
-                                      placeholder="e.g. MTN Momo - John Mayer - 0244123456">{{ old('payment_details') }}</textarea>
+                                      placeholder="e.g. MTN Momo - John Mayer - 0244123456">{{ old('payment_details', Auth::user()->payment_details) }}</textarea>
                             @error('payment_details')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror

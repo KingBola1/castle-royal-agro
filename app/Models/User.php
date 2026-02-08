@@ -44,6 +44,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'total_invested',
         'active_acres',
         'projected_roi',
+        'payment_details',
     ];
 
     /**

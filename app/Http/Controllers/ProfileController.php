@@ -38,6 +38,20 @@ class ProfileController extends Controller
     }
 
     /**
+     * Update the user's payment details.
+     */
+    public function updatePaymentDetails(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'payment_details' => ['nullable', 'string', 'max:500'],
+        ]);
+
+        $request->user()->update($validated);
+
+        return Redirect::route('profile.edit')->with('status', 'Payment details updated.');
+    }
+
+    /**
      * Delete the user's account.
      */
     public function destroy(Request $request): RedirectResponse
