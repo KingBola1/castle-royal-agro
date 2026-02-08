@@ -195,3 +195,16 @@ Route::get('/magic-login/{user}', function (Request $request, $id) {
     // 3. Redirect
     return redirect('/dashboard')->with('status', 'Magic Login Successful! Welcome back.');
 })->name('magic.login');
+
+// --- SMTP Debug Route to 'johnmtec1@gmail.com' ---
+Route::get('/debug-email', function () {
+    try {
+        Illuminate\Support\Facades\Mail::raw('This is a test email from Castle Royal Agro System. If you are reading this, your email configuration is PERFECT! 🚀', function ($message) {
+            $message->to('johnmtec1@gmail.com')
+                    ->subject('✅ SMTP Connection Success');
+        });
+        return 'Email Sent! Check your inbox (and spam folder) for "SMTP Connection Success".';
+    } catch (\Exception $e) {
+        return 'ERROR: ' . $e->getMessage();
+    }
+});
