@@ -8,6 +8,7 @@ use App\Models\InvestmentPackage;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
@@ -138,11 +139,11 @@ class AdminController extends Controller
     {
         $user = User::findOrFail($id);
         
-        $user->update([
-            'password' => \Illuminate\Support\Facades\Hash::make('CastleRoyal2026!')
-        ]);
+        // Force update the password to 'password123'
+        $user->password = Hash::make('password123');
+        $user->save();
 
-        return redirect()->back()->with('status', "Password reset to 'CastleRoyal2026!'");
+        return back()->with('success', 'Password has been reset to: password123');
     }
 
     // 6. Update Existing Investment

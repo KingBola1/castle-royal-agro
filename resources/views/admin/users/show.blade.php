@@ -72,13 +72,13 @@
 
                             {{-- Password Reset Tool --}}
                             <div class="mt-6 border-t pt-4">
-                                <form method="POST" action="{{ route('admin.users.reset-password', $user->id) }}" onsubmit="return confirm('Are you sure? This will set the password to CastleRoyal2026!')">
+                                <form method="POST" action="{{ route('admin.users.reset-password', $user->id) }}" onsubmit="return confirm('Are you sure? This will set the password to password123')">
                                     @csrf
                                     <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:border-red-900 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150">
                                         Reset Password
                                     </button>
                                 </form>
-                                <p class="text-xs text-gray-400 mt-2 text-center"> Default: CastleRoyal2026!</p>
+                                <p class="text-xs text-gray-400 mt-2 text-center"> Default: password123</p>
                             </div>
                         </div>
 
