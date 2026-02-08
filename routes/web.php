@@ -102,3 +102,27 @@ Route::get('/debug-smtp', function () {
            "<p><strong>Port:</strong> " . $config['port'] . "</p>" .
            "<p><strong>Username:</strong> " . $config['username'] . "</p>";
 });
+
+// Route for Force Password Reset (Temporary Debugging)
+Route::get('/force-password-fix', function () {
+    $email = 'johnmtec1@gmail.com';
+    $newPass = 'Castle2026';
+    
+    // 1. Check if user exists
+    $count = Illuminate\Support\Facades\DB::table('users')->where('email', $email)->count();
+    
+    if ($count == 0) {
+        return "ERROR: User with email $email not found!";
+    }
+
+    if ($count > 1) {
+        return "CRITICAL ERROR: Found $count users with this email. Duplicate accounts exist!";
+    }
+
+    // 2. Force Update (Raw SQL Query)
+    Illuminate\Support\Facades\DB::table('users')
+        ->where('email', $email)
+        ->update(['password' => Illuminate\Support\Facades\Hash::make($newPass)]);
+
+    return "SUCCESS: Password for $email has been force-reset to: $newPass <br> <a href='/login'>Go to Login</a>";
+});
