@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Withdrawal;
 use App\Models\User;
+use App\Mail\WithdrawalApproved;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 
 class AdminWithdrawalController extends Controller
@@ -40,6 +43,14 @@ class AdminWithdrawalController extends Controller
             'status' => $request->status,
             'admin_note' => $request->admin_note, // Optional note
         ]);
+
+        if ($request->status === 'approved') {
+            try {
+                Mail::to($withdrawal->user->email)->send(new WithdrawalApproved($withdrawal, $withdrawal->user));
+            } catch (\Exception $e) {
+                Log::error("Email failed to send: " . $e->getMessage());
+            }
+        }
 
         return back()->with('status', 'Withdrawal request updated successfully.');
     }
