@@ -166,6 +166,19 @@ Route::get('/debug-hashing', function () {
     ];
 });
 
+// --- DEBUG CONFIG (HTTPS/Proxy Test) ---
+Route::get('/debug-config', function (Illuminate\Http\Request $request) {
+    return [
+        'secure' => $request->secure() ? 'YES (HTTPS)' : 'NO (HTTP)',
+        'ip' => $request->ip(),
+        'user_agent' => $request->header('User-Agent'),
+        'host' => $request->getHost(),
+        'port' => $request->getPort(),
+        'scheme' => $request->getScheme(),
+        'url_generation' => url('/'),
+    ];
+});
+
 // --- GLOBAL MAGIC LINK ROUTE (Must be outside all groups) ---
 
 
