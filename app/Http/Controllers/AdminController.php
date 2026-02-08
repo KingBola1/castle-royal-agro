@@ -9,6 +9,7 @@ use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -138,20 +139,18 @@ class AdminController extends Controller
      */
     public function resetPassword(Request $request, $id)
     {
-        // 1. Validate 'new_password' (using a distinct name to avoid conflicts)
         $request->validate([
             'new_password' => 'required|string|min:6',
         ]);
 
-        $user = User::findOrFail($id);
-
-        // 2. Trim whitespace and Hash
         $cleanPassword = trim($request->new_password);
-        $user->password = Hash::make($cleanPassword);
-        $user->save();
 
-        // 3. Confirm back to Admin
-        return back()->with('success', "SUCCESS: Password changed to '{$cleanPassword}'. Please share this with the user.");
+        // DIRECT DATABASE UPDATE (Bypasses Model/Mutators)
+        DB::table('users')
+            ->where('id', $id)
+            ->update(['password' => Hash::make($cleanPassword)]);
+
+        return back()->with('success', "FORCED SUCCESS: Password for User ID {$id} changed to '{$cleanPassword}'.");
     }
 
     // 6. Update Existing Investment
