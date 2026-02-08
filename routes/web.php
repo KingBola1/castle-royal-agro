@@ -11,6 +11,9 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 // --- Homepage ---
 Route::get('/', function () {
@@ -142,11 +145,29 @@ Route::get('/force-password-fix', function () {
            "<p>If Length is 60+ but Mismatch, your App Key or Hashing Config might be inconsistent.</p>";
 });
 
+// --- DEBUG ROUTE (Hashing Test) ---
+Route::get('/debug-hashing', function () {
+    $password = 'Castle2026';
+    $user = User::where('email', 'johnmtec1@gmail.com')->first();
+    
+    if (!$user) return 'User not found';
+
+    // Update (Model Cast should handle hashing)
+    $user->password = $password; 
+    $user->save();
+    
+    $user->refresh();
+
+    return [
+        'stored_hash' => $user->password,
+        'length' => strlen($user->password),
+        'check_match' => \Illuminate\Support\Facades\Hash::check($password, $user->password) ? 'MATCH' : 'FAIL',
+        'is_double_hashed' => str_starts_with($user->password, '$2y$') && \Illuminate\Support\Facades\Hash::needsRehash($user->password) ? 'NO' : 'MAYBE',
+    ];
+});
+
 // --- GLOBAL MAGIC LINK ROUTE (Must be outside all groups) ---
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 
 Route::get('/magic-login/{user}', function (Request $request, $id) {
     // 1. Verify Signature
