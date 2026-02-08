@@ -122,19 +122,32 @@
                             @csrf
                             @method('patch')
 
-                            <label for="payment_details" class="block font-medium text-sm text-gray-700">
-                                Default Payment Details (Auto-Fill for Withdrawals)
-                            </label>
-                            <div class="mt-1 flex rounded-md shadow-sm">
-                                <textarea id="payment_details" name="payment_details" rows="2" 
-                                    class="focus:ring-indigo-500 focus:border-indigo-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300" 
-                                    placeholder="e.g. MTN MoMo - 0244 000 000 - John Doe">{{ Auth::user()->payment_details }}</textarea>
-                                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-r-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
-                                    Save
-                                </button>
+                            {{-- MoMo Details --}}
+                            <div class="mb-4">
+                                <label for="momo_details" class="block font-medium text-sm text-gray-700">
+                                    Mobile Money Details
+                                </label>
+                                <textarea id="momo_details" name="momo_details" rows="2" 
+                                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" 
+                                    placeholder="e.g. MTN MoMo - 0244 000 000 - John Doe">{{ Auth::user()->momo_details }}</textarea>
                             </div>
+
+                            {{-- Bank Details --}}
+                            <div class="mb-4">
+                                <label for="bank_details" class="block font-medium text-sm text-gray-700">
+                                    Bank Account Details
+                                </label>
+                                <textarea id="bank_details" name="bank_details" rows="2" 
+                                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" 
+                                    placeholder="e.g. GCB Bank - Accra Branch - Account Number - Name">{{ Auth::user()->bank_details }}</textarea>
+                            </div>
+
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition">
+                                Save Wallet Settings
+                            </button>
+                            
                             <p class="mt-2 text-xs text-gray-500">
-                                Enter your MoMo Name & Number here. Next time you request a payout, this will be typed for you automatically!
+                                Saved details will auto-fill your Withdrawal Requests.
                             </p>
                         </form>
                     </div>

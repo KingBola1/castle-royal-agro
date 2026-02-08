@@ -43,12 +43,11 @@ class ProfileController extends Controller
     public function updatePaymentDetails(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'payment_details' => ['nullable', 'string', 'max:500'],
+            'momo_details' => ['nullable', 'string', 'max:500'],
+            'bank_details' => ['nullable', 'string', 'max:500'],
         ]);
 
-        $request->user()->update([
-            'payment_details' => $request->payment_details
-        ]);
+        $request->user()->update($validated);
 
         return Redirect::route('dashboard')->with('status', 'Wallet details updated successfully!');
     }

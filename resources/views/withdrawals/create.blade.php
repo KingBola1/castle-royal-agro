@@ -42,12 +42,25 @@
                         </div>
 
                         <div class="mb-4">
+                            <label for="fill_payment" class="block font-medium text-sm text-gray-700">Quick Auto-Fill</label>
+                            <select id="fill_payment" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <option value="">Select a Saved Method...</option>
+                                @if(Auth::user()->momo_details)
+                                    <option value="{{ Auth::user()->momo_details }}">Use Saved MoMo: {{ Str::limit(Auth::user()->momo_details, 30) }}</option>
+                                @endif
+                                @if(Auth::user()->bank_details)
+                                    <option value="{{ Auth::user()->bank_details }}">Use Saved Bank: {{ Str::limit(Auth::user()->bank_details, 30) }}</option>
+                                @endif
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
                             <label for="payment_details" class="block font-medium text-sm text-gray-700">Payment Details (MoMo Name & Number)</label>
                             <textarea id="payment_details" class="block mt-1 w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" 
                                       name="payment_details" 
                                       rows="3" 
                                       required 
-                                      placeholder="e.g. MTN Momo - John Mayer - 0244123456">{{ old('payment_details', Auth::user()->payment_details) }}</textarea>
+                                      placeholder="e.g. MTN Momo - John Mayer - 0244123456"></textarea>
                             @error('payment_details')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
@@ -59,6 +72,14 @@
                             </button>
                         </div>
                     </form>
+
+                    <script>
+                        document.getElementById('fill_payment').addEventListener('change', function() {
+                            if(this.value) {
+                                document.getElementById('payment_details').value = this.value;
+                            }
+                        });
+                    </script>
 
                 </div>
             </div>
