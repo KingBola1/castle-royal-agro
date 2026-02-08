@@ -136,19 +136,19 @@ class AdminController extends Controller
     /**
      * Force reset a user's password.
      */
-    public function resetPassword($id)
+    public function resetPassword(Request $request, $id)
     {
+        $request->validate([
+            'password' => 'required|string|min:6',
+        ]);
+
         $user = User::findOrFail($id);
 
-        // Generate a random 10-character password
-        $newPassword = Str::random(10);
-
-        // Hash and Save
-        $user->password = Hash::make($newPassword);
+        // Hash the password typed by the Admin
+        $user->password = Hash::make($request->password);
         $user->save();
 
-        // Show the RAW password to the Admin so they can copy it
-        return back()->with('success', "Password reset successfully. copy this temporary password: " . $newPassword);
+        return back()->with('success', "Password successfully changed to: " . $request->password);
     }
 
     // 6. Update Existing Investment

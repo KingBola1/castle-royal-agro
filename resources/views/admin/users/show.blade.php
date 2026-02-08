@@ -72,13 +72,20 @@
 
                             {{-- Password Reset Tool --}}
                             <div class="mt-6 border-t pt-4">
-                                <form method="POST" action="{{ route('admin.users.reset-password', $user->id) }}" onsubmit="return confirm('Are you sure? This will generate a new random password.')">
+                                <form action="{{ route('admin.users.reset-password', $user->id) }}" method="POST" class="mt-4">
                                     @csrf
-                                    <button type="submit" class="w-full inline-flex justify-center items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-700 active:bg-red-900 focus:outline-none focus:border-red-900 focus:ring ring-red-300 disabled:opacity-25 transition ease-in-out duration-150">
-                                        Reset Password
-                                    </button>
+                                    <label class="block font-medium text-sm text-gray-700">Set New Password</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" name="password" required placeholder="Type new password..." 
+                                            class="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+
+                                        <button type="submit" onclick="return confirm('Are you sure you want to change this user\'s password?')"
+                                                class="inline-flex items-center px-4 py-2 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200 active:bg-red-600 transition">
+                                            Set
+                                        </button>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Type the new password here and click Set.</p>
                                 </form>
-                                <p class="text-xs text-gray-400 mt-2 text-center"> Use this to generate a temporary login.</p>
                             </div>
                         </div>
 
