@@ -208,3 +208,16 @@ Route::get('/debug-email', function () {
         return 'ERROR: ' . $e->getMessage();
     }
 });
+
+// Brevo API Driver Test Route
+Route::get('/test-brevo', function () {
+    try {
+        Illuminate\Support\Facades\Mail::raw('If you read this, the Brevo API Driver is working! 🚀', function ($msg) {
+            $msg->to('johnmtec1@gmail.com')
+                ->subject('Brevo API Test Success');
+        });
+        return 'Email sent via Brevo API! Check your inbox.';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
