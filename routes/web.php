@@ -197,3 +197,6 @@ Route::get('/magic-login/{user}', function (Request $request, $id) {
 })->name('magic.login');
 
 // --- DEBUG ROUTE (Hashing Test) ---
+
+// --- Support / Contact Form ---
+Route::post('/contact-support', [App\Http\Controllers\SupportController::class, 'handleContact'])->name('support.send');
