@@ -221,3 +221,17 @@ Route::get('/test-brevo', function () {
         return 'Error: ' . $e->getMessage();
     }
 });
+
+// Force Email Test Route (Direct API)
+Route::get('/force-email-test', function () {
+    $response = Illuminate\Support\Facades\Http::withHeaders([
+        'api-key' => env('BREVO_API_KEY'),
+    ])->post('https://api.brevo.com/v3/smtp/email', [
+        'sender' => ['email' => env('MAIL_FROM_ADDRESS'), 'name' => 'System Test'],
+        'to' => [['email' => 'johnmtec1@gmail.com']],
+        'subject' => 'API Connection Test',
+        'htmlContent' => '<h1>System Online!</h1><p>The API bridge is working perfectly.</p>'
+    ]);
+
+    return $response->json();
+});
