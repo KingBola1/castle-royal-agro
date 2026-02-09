@@ -46,46 +46,30 @@ class AdminWithdrawalController extends Controller
         ]);
 
         if ($request->status === 'approved') {
-            // 1. Render the HTML content from the Blade view
-            $htmlContent = view('emails.withdrawals.approved', [
-                'withdrawal' => $withdrawal, 
-                'user' => $withdrawal->user
-            ])->render();
-
-            // 2. The Direct API Postman (Bypass Laravel Mail)
-            $response = Http::withHeaders([
+            // Send Approval Email via Direct API
+            Http::withHeaders([
                 'api-key' => env('BREVO_API_KEY'),
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
             ])->post('https://api.brevo.com/v3/smtp/email', [
-                'sender' => [
-                    'name' => env('MAIL_FROM_NAME', 'Castle Royal Agro'),
-                    'email' => env('MAIL_FROM_ADDRESS')
-                ],
-                'to' => [
-                    [
-                        'email' => $withdrawal->user->email,
-                        'name' => $withdrawal->user->name
-                    ]
-                ],
-                'subject' => '🎉 Your Withdrawal has been Approved!',
-                'htmlContent' => "
-                    <div style='font-family: Arial; padding: 20px; border: 1px solid #eee;'>
-                        <h2>Hello {$withdrawal->user->name},</h2>
-                        <p>Your withdrawal request for <strong>GHS " . number_format($withdrawal->amount, 2) . "</strong> has been approved and processed.</p>
-                        <p><strong>Payment Details:</strong> {$withdrawal->payment_details}</p>
-                        <hr>
-                        <p>Thank you for your continued trust in Castle Royal Agro.</p>
-                    </div>"
+                'sender' => ['email' => env('MAIL_FROM_ADDRESS'), 'name' => 'Castle Royal Admin'],
+                'to' => [['email' => $withdrawal->user->email, 'name' => $withdrawal->user->name]],
+                'subject' => '🎉 Withdrawal Approved!',
+                'htmlContent' => "<h2>Hello {$withdrawal->user->name},</h2><p>Your withdrawal of <strong>GHS " . number_format($withdrawal->amount, 2) . "</strong> has been approved and processed.</p><p>Thank you for investing with Castle Royal Agro.</p>"
             ]);
 
-            // 3. Result Handling
-            if ($response->successful()) {
-                return redirect()->back()->with('success', 'Withdrawal Approved & Notification Sent! 🚀');
-            } else {
-                Log::error('Brevo API Failure: ' . $response->body());
-                return redirect()->back()->with('success', 'Approved, but email notification failed. Check logs.');
-            }
+            return redirect()->back()->with('success', 'Withdrawal Approved & Investor Notified.');
+        } 
+        elseif ($request->status === 'rejected') {
+            // Send Denial Email via Direct API
+            Http::withHeaders([
+                'api-key' => env('BREVO_API_KEY'),
+            ])->post('https://api.brevo.com/v3/smtp/email', [
+                'sender' => ['email' => env('MAIL_FROM_ADDRESS'), 'name' => 'Castle Royal Admin'],
+                'to' => [['email' => $withdrawal->user->email, 'name' => $withdrawal->user->name]],
+                'subject' => '⚠️ Withdrawal Request Declined',
+                'htmlContent' => "<h2>Hello {$withdrawal->user->name},</h2><p>Your withdrawal request for <strong>GHS " . number_format($withdrawal->amount, 2) . "</strong> has been declined.</p><p>Please check your payment details in your dashboard or contact support for more information.</p>"
+            ]);
+
+            return redirect()->back()->with('success', 'Withdrawal Denied & Investor Notified.');
         }
 
         return back()->with('status', 'Withdrawal request updated successfully.');

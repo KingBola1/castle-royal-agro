@@ -196,42 +196,4 @@ Route::get('/magic-login/{user}', function (Request $request, $id) {
     return redirect('/dashboard')->with('status', 'Magic Login Successful! Welcome back.');
 })->name('magic.login');
 
-// --- SMTP Debug Route to 'johnmtec1@gmail.com' ---
-Route::get('/debug-email', function () {
-    try {
-        Illuminate\Support\Facades\Mail::raw('This is a test email from Castle Royal Agro System. If you are reading this, your email configuration is PERFECT! 🚀', function ($message) {
-            $message->to('johnmtec1@gmail.com')
-                    ->subject('✅ SMTP Connection Success');
-        });
-        return 'Email Sent! Check your inbox (and spam folder) for "SMTP Connection Success".';
-    } catch (\Exception $e) {
-        return 'ERROR: ' . $e->getMessage();
-    }
-});
-
-// Brevo API Driver Test Route
-Route::get('/test-brevo', function () {
-    try {
-        Illuminate\Support\Facades\Mail::raw('If you read this, the Brevo API Driver is working! 🚀', function ($msg) {
-            $msg->to('johnmtec1@gmail.com')
-                ->subject('Brevo API Test Success');
-        });
-        return 'Email sent via Brevo API! Check your inbox.';
-    } catch (\Exception $e) {
-        return 'Error: ' . $e->getMessage();
-    }
-});
-
-// Force Email Test Route (Direct API)
-Route::get('/force-email-test', function () {
-    $response = Illuminate\Support\Facades\Http::withHeaders([
-        'api-key' => env('BREVO_API_KEY'),
-    ])->post('https://api.brevo.com/v3/smtp/email', [
-        'sender' => ['email' => env('MAIL_FROM_ADDRESS'), 'name' => 'System Test'],
-        'to' => [['email' => 'johnmtec1@gmail.com']],
-        'subject' => 'API Connection Test',
-        'htmlContent' => '<h1>System Online!</h1><p>The API bridge is working perfectly.</p>'
-    ]);
-
-    return $response->json();
-});
+// --- DEBUG ROUTE (Hashing Test) ---
