@@ -54,13 +54,13 @@ class AdminWithdrawalController extends Controller
 
             // 2. Send via Brevo API (Direct HTTP Request)
             $response = Http::withHeaders([
-                'api-key' => env('BREVO_API_KEY', 'xkeysib-placeholder'), // Ensure this is in .env
+                'api-key' => env('BREVO_API_KEY'),
                 'Content-Type' => 'application/json',
                 'Accept' => 'application/json',
             ])->post('https://api.brevo.com/v3/smtp/email', [
                 'sender' => [
-                    'name' => config('mail.from.name', 'Castle Royal Agro'),
-                    'email' => config('mail.from.address', 'admin@castleroyalagro.com')
+                    'name' => env('MAIL_FROM_NAME', 'Castle Royal Admin'),
+                    'email' => env('MAIL_FROM_ADDRESS') // FIX: Use verified sender from ENV
                 ],
                 'to' => [
                     [
@@ -72,12 +72,12 @@ class AdminWithdrawalController extends Controller
                 'htmlContent' => $htmlContent
             ]);
 
-            // 4. Log the result for debugging
+            // 4. Check & Debug
             if ($response->successful()) {
-                return redirect()->back()->with('success', 'Withdrawal Approved & Email Sent via API! 🚀');
+                return redirect()->back()->with('success', 'Withdrawal Approved & Email Sent Successfully! 🚀');
             } else {
-                Log::error('Brevo API Error: ' . $response->body());
-                return redirect()->back()->with('success', 'Withdrawal Approved (Email failed: Check Logs)');
+                // STOP AND SHOW THE ERROR
+                dd('BREVO API ERROR:', $response->body());
             }
         }
 
