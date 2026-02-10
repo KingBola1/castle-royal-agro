@@ -16,15 +16,21 @@ class EnsureAccountIsActive
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check() && Auth::user()->status !== 'active') {
-            Auth::logout();
+        if (Auth::check()) {
+            $user = Auth::user();
+            
+            // Allow access if status is missing (null) or empty.
+            // Only deny if explicitly banned/blocked/frozen.
+            if ($user->status && in_array($user->status, ['banned', 'blocked', 'frozen'])) {
+                Auth::logout();
 
-            $request->session()->invalidate();
-            $request->session()->regenerateToken();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
 
-            return redirect()->route('login')->withErrors([
-                'email' => 'Your account is currently frozen. Please contact support.',
-            ]);
+                return redirect()->route('login')->withErrors([
+                    'email' => 'Your account is currently frozen. Please contact support.',
+                ]);
+            }
         }
 
         return $next($request);
