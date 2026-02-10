@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class SuperAdminSeeder extends Seeder
 {
@@ -12,13 +14,29 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = \App\Models\User::find(1);
+        $email = 'kwamerahman83@gmail.com';
+        
+        $user = User::where('email', $email)->first();
+
         if ($user) {
-            $user->role = 'super_admin';
-            $user->save();
-            $this->command->info("User ID 1 ({$user->name}) has been promoted to Super Admin.");
+            // Force update existing user
+            $user->update([
+                'role' => 'super_admin',
+                'status' => 'active',
+                'email_verified_at' => Carbon::now(),
+            ]);
+            $this->command->info("Super Admin updated: $email");
         } else {
-            $this->command->error("User ID 1 not found. Please register a user first.");
+            // Create new user
+            User::create([
+                'name' => 'Super Admin',
+                'email' => $email,
+                'password' => Hash::make('CastleRoyal@2026!'), // Secure placeholder
+                'role' => 'super_admin',
+                'status' => 'active',
+                'email_verified_at' => Carbon::now(),
+            ]);
+            $this->command->info("Super Admin created: $email");
         }
     }
 }

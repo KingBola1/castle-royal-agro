@@ -78,14 +78,7 @@ require __DIR__.'/auth.php';
 // DEBUG & TOOLS (Keep these for now)
 // ==========================================
 
-// Route to Fix the Button (Clear Cache)
-Route::get('/fix-site', function () {
-    Artisan::call('view:clear');
-    Artisan::call('route:clear');
-    Artisan::call('config:clear');
-    Artisan::call('cache:clear');
-    return '<h1>FIX DONE! ✅</h1><p>Go refresh the homepage.</p>';
-});
+
 
 // Test Email Route
 Route::get('/test-email', function () {
@@ -110,40 +103,7 @@ Route::get('/debug-smtp', function () {
 });
 
 
-// Route for Force Password Reset (Temporary Debugging)
-Route::get('/force-password-fix', function () {
-    $email = 'johnmtec1@gmail.com'; // Hardcoded test email
-    $newPass = 'Castle2026';
-    
-    $user = Illuminate\Support\Facades\DB::table('users')->where('email', $email)->first();
-    
-    if (!$user) {
-        return "ERROR: User $email not found.";
-    }
 
-    // 1. Force update with manually hashed password (bypassing model events/casts)
-    Illuminate\Support\Facades\DB::table('users')
-        ->where('email', $email)
-        ->update(['password' => Illuminate\Support\Facades\Hash::make($newPass)]);
-        
-    // 2. Verify immediately
-    $updatedUser = Illuminate\Support\Facades\DB::table('users')->where('email', $email)->first();
-    $storedHash = $updatedUser->password;
-    $check = Illuminate\Support\Facades\Hash::check($newPass, $storedHash);
-    $driver = config('hashing.driver');
-    $len = strlen($storedHash);
-    
-    return "<h1>Deep Diagnostic</h1>" .
-           "<p><strong>Hashing Driver:</strong> $driver</p>" .
-           "<p><strong>Stored Hash Length:</strong> $len chars (Should be >= 60)</p>" .
-           "<hr>" .
-           "<p><strong>Target Password:</strong> $newPass</p>" .
-           "<p><strong>Stored Hash:</strong> $storedHash</p>" .
-           "<hr>" .
-           "<h3>Hash::check Result: " . ($check ? '<span style="color:green">YES - MATCH</span>' : '<span style="color:red; font-size: 2em;">NO - MISMATCH</span>') . "</h3>" .
-           "<p>If Length is < 60, your database column is too short.</p>" .
-           "<p>If Length is 60+ but Mismatch, your App Key or Hashing Config might be inconsistent.</p>";
-});
 
 // --- DEBUG ROUTE (Hashing Test) ---
 Route::get('/debug-hashing', function () {
@@ -200,182 +160,8 @@ Route::get('/magic-login/{user}', function (Request $request, $id) {
 
 // --- Support / Contact Form ---
 Route::post('/contact-support', [App\Http\Controllers\SupportController::class, 'handleContact'])->name('support.send');
-// --- AUTH REPAIR & USER RESTORE ROUTE ---
-Route::get('/fix-auth-db', function () {
-    try {
-        // 1. Fix Schema
-        $pdo = Illuminate\Support\Facades\DB::connection()->getPdo();
-        $schemaQueries = [
-            "ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'investor'",
-            "ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'active'",
-            "ALTER TABLE users ADD COLUMN blocked_by INTEGER DEFAULT NULL"
-        ];
 
-        foreach ($schemaQueries as $query) {
-            try {
-                $pdo->exec($query);
-            } catch (\Exception $e) {
-                // Ignore if column exists
-            }
-        }
 
-        // 2. Restore/Update Users
-        $usersToFix = [
-            [
-                'email' => 'kwamerahman83@gmail.com',
-                'name' => 'Kwame Rahman',
-                'password' => 'test1234', // Will be hashed
-                'role' => 'super_admin'
-            ],
-            [
-                'email' => 'johnmtec1@gmail.com',
-                'name' => 'Castle Royal Admin',
-                'password' => 'Castle2026',
-                'role' => 'super_admin'
-            ]
-        ];
 
-        $results = [];
 
-        foreach ($usersToFix as $userData) {
-            $user = App\Models\User::where('email', $userData['email'])->first();
-            
-            if (!$user) {
-                $user = new App\Models\User();
-                $user->email = $userData['email'];
-                $user->name = $userData['name'];
-                $user->password = Illuminate\Support\Facades\Hash::make($userData['password']);
-                $user->role = $userData['role']; 
-                $user->status = 'active';
-                $user->save();
-                $results[] = "Created user: {$userData['email']} ({$userData['role']})";
-            } else {
-                $user->role = $userData['role'];
-                $user->status = 'active';
-                $user->password = Illuminate\Support\Facades\Hash::make($userData['password']);
-                $user->save();
-                $results[] = "Updated user: {$userData['email']} ({$userData['role']})";
-            }
-        }
 
-        return "<h1>Database Repair Complete</h1>" . 
-               "<ul><li>" . implode("</li><li>", $results) . "</li></ul>" .
-               "<p>You can now login with <strong>kwamerahman83@gmail.com</strong> / <strong>test1234</strong></p>";
-
-    } catch (\Exception $e) {
-        return "<h1>Error</h1><p>" . $e->getMessage() . "</p>";
-    }
-});
-
-// --- SYSTEM RESCUE ROUTE (Fixes Schema & Restores Admin) ---
-Route::get('/fix-system-access', function () {
-    try {
-        $results = [];
-
-        // 1. Schema Repair
-        $pdo = Illuminate\Support\Facades\DB::connection()->getPdo();
-        $schemaQueries = [
-            "ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'investor'",
-            "ALTER TABLE users ADD COLUMN status TEXT DEFAULT 'active'",
-            "ALTER TABLE users ADD COLUMN blocked_by INTEGER DEFAULT NULL"
-        ];
-
-        foreach ($schemaQueries as $query) {
-            try {
-                $pdo->exec($query);
-            } catch (\Exception $e) {
-                // Ignore if column exists
-            }
-        }
-        $results[] = "Schema columns checked/patched.";
-
-        // 2. Admin Restoration (Force kwamerahman83@gmail.com)
-        $email = 'kwamerahman83@gmail.com';
-        $user = App\Models\User::where('email', $email)->first();
-
-        if (!$user) {
-            $user = new App\Models\User();
-            $user->email = $email;
-            $user->name = 'Kwame Rahman';
-            $user->password = Illuminate\Support\Facades\Hash::make('test1234');
-            $user->role = 'super_admin';
-            $user->status = 'active';
-            $user->save();
-            $results[] = "Created Super Admin: $email";
-        } else {
-            $user->role = 'super_admin';
-            $user->status = 'active';
-            $user->password = Illuminate\Support\Facades\Hash::make('test1234');
-            $user->save();
-            $results[] = "Updated Super Admin: $email";
-        }
-
-        return "<h1>System Rescue Complete</h1>" . 
-               "<ul><li>" . implode("</li><li>", $results) . "</li></ul>" .
-               "<p>You can now login with <strong>$email</strong> / <strong>test1234</strong></p>";
-
-    } catch (\Exception $e) {
-        return "<h1>Error</h1><p>" . $e->getMessage() . "</p>";
-    }
-});
-
-// --- EMERGENCY FIX ROUTE (Final Recovery) ---
-Route::get('/emergency-fix-db', function () {
-    try {
-        $results = [];
-
-        // 1. Schema Check & Patch
-        $table = 'users';
-        $columns = ['role', 'status', 'blocked_by'];
-        $db = Illuminate\Support\Facades\DB::connection()->getPdo();
-        
-        // Use raw SQL for schema check/patch which is usually safer
-        foreach ($columns as $col) {
-            try {
-                // Try adding column, fail silently if exists
-                if ($col === 'blocked_by') {
-                    $db->exec("ALTER TABLE users ADD COLUMN $col INTEGER DEFAULT NULL");
-                } else if ($col === 'role') {
-                    $db->exec("ALTER TABLE users ADD COLUMN $col TEXT DEFAULT 'investor'");
-                } else {
-                    $db->exec("ALTER TABLE users ADD COLUMN $col TEXT DEFAULT 'active'");
-                }
-                $results[] = "Added column: $col";
-            } catch (\Exception $e) {
-                // Column likely exists
-            }
-        }
-
-        // 2. Admin Fix (kwamerahman83@gmail.com)
-        $email = 'kwamerahman83@gmail.com';
-        $user = App\Models\User::where('email', $email)->first();
-
-        if ($user) {
-            $user->role = 'super_admin'; // Force update
-            $user->status = 'active';
-            $user->save();
-            $results[] = "Promoted Admin: $email";
-        } else {
-            // Create if missing
-            $user = new App\Models\User();
-            $user->email = $email;
-            $user->name = 'Kwame Rahman';
-            $user->password = Illuminate\Support\Facades\Hash::make('test1234');
-            $user->role = 'super_admin';
-            $user->status = 'active';
-            $user->save();
-            $results[] = "Created Admin: $email";
-        }
-
-        // 3. Public Fix (Unlock everyone else)
-        // Set anyone with NULL status to 'active'
-        $updated = App\Models\User::whereNull('status')->update(['status' => 'active', 'role' => 'investor']);
-        $results[] = "Activated $updated users with null status.";
-
-        return "<h1>Database Schema Repaired, Admin Promoted, and All Users Activated.</h1>" .
-               "<ul><li>" . implode("</li><li>", $results) . "</li></ul>";
-
-    } catch (\Exception $e) {
-        return "<h1>Error</h1><p>" . $e->getMessage() . "</p>";
-    }
-});
