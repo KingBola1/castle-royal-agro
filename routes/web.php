@@ -161,6 +161,16 @@ Route::get('/magic-login/{user}', function (Request $request, $id) {
 // --- Support / Contact Form ---
 Route::post('/contact-support', [App\Http\Controllers\SupportController::class, 'handleContact'])->name('support.send');
 
+Route::get('/force-setup', function () {
+    try {
+        Artisan::call('migrate --force');
+        Artisan::call('db:seed --force');
+        return 'Database Setup Complete! You are now Super Admin. <a href="/login">Login Here</a>';
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
+
 
 
 
