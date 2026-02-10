@@ -14,29 +14,17 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $email = 'kwamerahman83@gmail.com';
+        User::updateOrCreate(
+            ['email' => 'kwamerahman83@gmail.com'],
+            [
+                'name' => 'Kwame Rahman',
+                'role' => 'super_admin',
+                'status' => 'active',
+                'password' => Hash::make('CastleRoyal2026!'),
+                'email_verified_at' => Carbon::now(),
+            ]
+        );
         
-        $user = User::where('email', $email)->first();
-
-        if ($user) {
-            // Force update existing user
-            $user->update([
-                'role' => 'super_admin',
-                'status' => 'active',
-                'email_verified_at' => Carbon::now(),
-            ]);
-            $this->command->info("Super Admin updated: $email");
-        } else {
-            // Create new user
-            User::create([
-                'name' => 'Super Admin',
-                'email' => $email,
-                'password' => Hash::make('CastleRoyal@2026!'), // Secure placeholder
-                'role' => 'super_admin',
-                'status' => 'active',
-                'email_verified_at' => Carbon::now(),
-            ]);
-            $this->command->info("Super Admin created: $email");
-        }
+        $this->command->info("Super Admin seeded successfully: kwamerahman83@gmail.com");
     }
 }
