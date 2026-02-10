@@ -19,16 +19,16 @@ class EnsureAccountIsActive
         if (Auth::check()) {
             $user = Auth::user();
             
-            // Allow access if status is missing (null) or empty.
-            // Only deny if explicitly banned/blocked/frozen.
-            if ($user->status && in_array($user->status, ['banned', 'blocked', 'frozen'])) {
+            // STRICTLY PERMISSIVE: Only deny if explicitly 'banned'.
+            // Allow null, allow 'active', allow 'frozen' (unless strictly banned).
+            if ($user->status === 'banned') {
                 Auth::logout();
 
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
 
                 return redirect()->route('login')->withErrors([
-                    'email' => 'Your account is currently frozen. Please contact support.',
+                    'email' => 'Your account is currently banned. Please contact support.',
                 ]);
             }
         }
