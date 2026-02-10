@@ -64,6 +64,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
     // Admin Withdrawals
     Route::resource('admin/withdrawals', AdminWithdrawalController::class)->only(['index', 'update']);
+
+    // User Management (New RBAC System)
+    Route::get('/users-management', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::get('/users-management/{user}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users-management/{user}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
 });
 
 // User Withdrawal Routes
