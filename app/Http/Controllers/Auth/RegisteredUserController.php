@@ -41,6 +41,8 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $user->assignRole('investor');
+
         try {
             event(new Registered($user));
         } catch (\Exception $e) {

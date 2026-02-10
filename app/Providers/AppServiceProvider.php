@@ -21,6 +21,12 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // FORCE HTTPS GLOBALLY (Fixes Signature Mismatch)
-        URL::forceScheme('https');
+        \Illuminate\Support\Facades\URL::forceScheme('https');
+
+        // Implicitly grant "Super Admin" role all permissions
+        // This works in the app by using gate-related functions like auth()->user->can() and @can()
+        \Illuminate\Support\Facades\Gate::before(function ($user, $ability) {
+            return $user->hasRole('super_admin') ? true : null;
+        });
     }
 }
