@@ -22,6 +22,11 @@
                         {{ __('User Management') }}
                     </x-nav-link>
                     @endcan
+                    @role('Super Admin')
+                    <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
+                        {{ __('Packages') }}
+                    </x-nav-link>
+                    @endrole
                     @if(Auth::user()->role === 'super_admin' || Auth::user()->role === 'admin')
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Admin Panel') }}

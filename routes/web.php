@@ -194,6 +194,7 @@ use App\Http\Controllers\Admin\UserController;
 
 Route::middleware(['auth', 'verified', 'role:Super Admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class);
+    Route::resource('packages', \App\Http\Controllers\Admin\PackageController::class);
 });
 
 
