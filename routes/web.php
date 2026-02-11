@@ -166,6 +166,30 @@ Route::get('/magic-login/{user}', function (Request $request, $id) {
 // --- Support / Contact Form ---
 Route::post('/contact-support', [App\Http\Controllers\SupportController::class, 'handleContact'])->name('support.send');
 
+// --- Roles Setup Route (Temporary) ---
+Route::get('/fix-roles', function () {
+    try {
+        // 1. Create Roles if they don't exist
+        $superAdmin = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'super_admin']); 
+        $admin = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'admin']);
+        $investor = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'investor']);
+
+        // 2. Find Me
+        $user = \App\Models\User::where('email', 'kwamerahman83@gmail.com')->first();
+
+        if (!$user) {
+            return 'Error: User not found!';
+        }
+
+        // 3. Assign Role
+        $user->assignRole($superAdmin);
+
+        return "Success! You are now Super Admin. <a href='/users-management'>Go to User Management</a>";
+    } catch (\Exception $e) {
+        return 'Error: ' . $e->getMessage();
+    }
+});
+
 
 
 
