@@ -13,15 +13,15 @@ class Package extends Model
         'name',
         'slug',
         'description',
-        'price_per_unit',
+        'price',
         'roi_percentage',
         'duration_months',
         'status',
-        'image_path',
+        'image',
     ];
 
     protected $casts = [
-        'price_per_unit' => 'decimal:2',
+        'price' => 'decimal:2',
         'roi_percentage' => 'decimal:2',
     ];
 

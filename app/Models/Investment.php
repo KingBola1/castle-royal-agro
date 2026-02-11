@@ -13,18 +13,14 @@ class Investment extends Model
         'user_id',
         'package_id',
         'amount_invested',
-        'units_purchased',
-        'expected_returns',
-        'start_date',
-        'end_date',
+        'units',
+        'expected_roi',
         'status',
     ];
 
     protected $casts = [
         'amount_invested' => 'decimal:2',
-        'expected_returns' => 'decimal:2',
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'expected_roi' => 'decimal:2',
     ];
 
     public function user()

@@ -16,11 +16,11 @@ return new class extends Migration
             $table->string('name');
             $table->string('slug')->unique();
             $table->text('description');
-            $table->decimal('price_per_unit', 10, 2);
+            $table->decimal('price', 10, 2);
             $table->decimal('roi_percentage', 5, 2);
             $table->integer('duration_months');
-            $table->string('status')->default('coming_soon'); // 'open', 'closed', 'coming_soon'
-            $table->string('image_path')->nullable();
+            $table->string('status')->default('draft'); // 'draft', 'open', 'closed', 'sold_out'
+            $table->string('image')->nullable();
             $table->timestamps();
         });
     }

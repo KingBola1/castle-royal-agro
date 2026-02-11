@@ -18,11 +18,9 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('package_id')->constrained('packages')->cascadeOnDelete();
             $table->decimal('amount_invested', 15, 2);
-            $table->integer('units_purchased');
-            $table->decimal('expected_returns', 15, 2);
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->string('status')->default('active'); // 'active', 'completed', 'cancelled'
+            $table->integer('units');
+            $table->decimal('expected_roi', 15, 2);
+            $table->string('status')->default('active'); // 'pending', 'active', 'completed'
             $table->timestamps();
         });
     }
