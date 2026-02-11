@@ -59,8 +59,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     
     Route::post('/admin/investments/bulk-update', [AdminController::class, 'bulkUpdateRoi'])->name('admin.investments.bulk-update');
     
-    // Investment Packages (The Package Factory)
-    Route::resource('admin/packages', \App\Http\Controllers\InvestmentPackageController::class)->except(['show', 'edit', 'update']);
+    // Investment Packages (THE NEW PackageController HANDLES THIS NOW)
+    // Route::resource('admin/packages', \App\Http\Controllers\InvestmentPackageController::class)->except(['show', 'edit', 'update']);
 
     // Admin Withdrawals
     Route::resource('admin/withdrawals', AdminWithdrawalController::class)->only(['index', 'update']);

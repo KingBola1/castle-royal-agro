@@ -14,6 +14,7 @@ class PackageController extends Controller
      */
     public function index()
     {
+        // FORCE PAGINATION: Ensure we return a LengthAwarePaginator, not a Collection
         $packages = Package::latest()->paginate(10);
         return view('admin.packages.index', compact('packages'));
     }
@@ -42,7 +43,6 @@ class PackageController extends Controller
         ]);
 
         $slug = Str::slug($request->name);
-        // Ensure slug uniqueness
         $count = Package::where('slug', 'LIKE', "{$slug}%")->count();
         if ($count > 0) {
             $slug .= '-' . ($count + 1);
@@ -85,7 +85,6 @@ class PackageController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        // Update slug only if name changed
         if ($request->name !== $package->name) {
              $slug = Str::slug($request->name);
              $count = Package::where('slug', 'LIKE', "{$slug}%")->where('id', '!=', $package->id)->count();
@@ -103,7 +102,6 @@ class PackageController extends Controller
             'duration_months' => $request->duration_months,
             'status' => $request->status,
             'image' => $request->image,
-            // maintain slug if updated above
         ]);
 
         return redirect()->route('admin.packages.index')->with('status', 'Package updated successfully!');
@@ -114,13 +112,7 @@ class PackageController extends Controller
      */
     public function destroy(Package $package)
     {
-        // Check for existing investments before deleting? 
-        // For now, allow delete (with soft deletes or constraints, user didn't specify strict constraints but cascade exists if db configured so)
-        // Migration has cascadeOnDelete for investments, so this will delete investments too!
-        // Maybe we should warn, but user asked for CRUD.
-        
         $package->delete();
-
         return redirect()->route('admin.packages.index')->with('status', 'Package deleted successfully.');
     }
 }
