@@ -223,3 +223,20 @@ Route::get('/fix-roles-v2', function () {
         return $e->getMessage();
     }
 });
+
+// --- Debug Route (User Auth) ---
+Route::get('/debug-user', function () {
+    $user = Auth::user();
+    if (!$user) return response()->json(['error' => 'Not Logged In'], 401);
+    
+    return [
+        'id' => $user->id,
+        'name' => $user->name,
+        'email' => $user->email,
+        'role_column' => $user->role, 
+        'roles_spatie' => $user->getRoleNames(),
+        'permissions' => $user->getAllPermissions()->pluck('name'),
+        'is_super_admin' => $user->hasRole('Super Admin') ? 'YES' : 'NO',
+        'is_admin' => $user->hasRole('admin') ? 'YES' : 'NO',
+    ];
+});
