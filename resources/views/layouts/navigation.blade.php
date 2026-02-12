@@ -34,7 +34,7 @@
                         <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
                             {{ __('Packages') }}
                         </x-nav-link>
-                        <x-nav-link href="#" :active="false">
+                        <x-nav-link :href="route('admin.withdrawals.index')" :active="request()->routeIs('admin.withdrawals.*')">
                             {{ __('Withdrawal Requests') }}
                         </x-nav-link>
                     @endif
@@ -100,7 +100,7 @@
                 <x-responsive-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
                     {{ __('Packages') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link href="#" :active="false">
+                <x-responsive-nav-link :href="route('admin.withdrawals.index')" :active="request()->routeIs('admin.withdrawals.*')">
                     {{ __('Withdrawals') }}
                 </x-responsive-nav-link>
             @endif
