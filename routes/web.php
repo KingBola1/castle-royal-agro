@@ -204,3 +204,22 @@ Route::middleware(['auth', 'verified', 'role:Super Admin'])->prefix('admin')->na
 
 
 
+// --- Quick Role Fix (Case Sensitivity) ---
+Route::get('/fix-roles-v2', function () {
+    try {
+        // Create the role exactly as the middleware expects it ('Super Admin')
+        $role = \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Super Admin']);
+        
+        $user = \App\Models\User::where('email', 'kwamerahman83@gmail.com')->first();
+        
+        if (!$user) {
+            return 'User not found';
+        }
+
+        $user->assignRole($role);
+        
+        return "Role 'Super Admin' assigned to " . $user->email;
+    } catch (\Exception $e) {
+        return $e->getMessage();
+    }
+});
