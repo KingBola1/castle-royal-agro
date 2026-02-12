@@ -248,3 +248,15 @@ Route::get('/debug-user', function () {
         'is_admin' => $user->hasRole('admin') ? 'YES' : 'NO',
     ];
 });
+
+// --- Force Verify Route ---
+Route::get('/force-verify', function () {
+    $user = auth()->user();
+    if (!$user) return "Login first.";
+
+    if (!$user->hasVerifiedEmail()) {
+        $user->markEmailAsVerified();
+    }
+
+    return redirect('/dashboard')->with('status', 'You have been manually verified!');
+});
