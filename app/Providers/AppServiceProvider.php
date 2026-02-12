@@ -21,7 +21,18 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         // FORCE HTTPS GLOBALLY (Fixes Signature Mismatch)
-        \Illuminate\Support\Facades\URL::forceScheme('https');
+        URL::forceScheme('https');
+
+        // Register Brevo Mailer Driver
+        \Illuminate\Support\Facades\Mail::extend('brevo', function () {
+            return (new \Symfony\Component\Mailer\Bridge\Brevo\Transport\BrevoTransportFactory)->create(
+                new \Symfony\Component\Mailer\Transport\Dsn(
+                    'brevo+api',
+                    'default',
+                    config('services.brevo.key')
+                )
+            );
+        });
 
         // Implicitly grant "Super Admin" role all permissions
         // This works in the app by using gate-related functions like auth()->user->can() and @can()
