@@ -34,11 +34,12 @@ class PackageController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'roi_percentage' => 'required|numeric|min:0',
-            'duration_months' => 'required|integer|min:1',
-            'status' => 'required|in:draft,open,closed,sold_out',
-            'image' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+            'roi_percentage' => 'nullable|numeric|min:0',
+            'duration_months' => 'nullable|integer|min:1',
+            'status' => 'nullable|in:draft,open,closed,sold_out',
+            'image' => 'nullable|image|max:2048', // File upload validation
+            'image_url' => 'nullable|url',        // URL fallback validation
             'description' => 'nullable|string',
         ]);
 
@@ -48,16 +49,20 @@ class PackageController extends Controller
             $slug .= '-' . ($count + 1);
         }
 
-        Package::create([
-            'name' => $request->name,
-            'slug' => $slug,
-            'description' => $request->description,
-            'price' => $request->price,
-            'roi_percentage' => $request->roi_percentage,
-            'duration_months' => $request->duration_months,
-            'status' => $request->status,
-            'image' => $request->image,
-        ]);
+        $data = $request->except(['image', 'image_url']);
+        $data['slug'] = $slug;
+
+        // 1. Handle File Upload
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('packages', 'public');
+            $data['image'] = 'storage/' . $path;
+        }
+        // 2. Handle URL fallback
+        elseif ($request->filled('image_url')) {
+            $data['image'] = $request->image_url;
+        }
+
+        Package::create($data);
 
         return redirect()->route('admin.packages.index')->with('status', 'Package created successfully!');
     }
@@ -77,11 +82,12 @@ class PackageController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'roi_percentage' => 'required|numeric|min:0',
-            'duration_months' => 'required|integer|min:1',
-            'status' => 'required|in:draft,open,closed,sold_out',
-            'image' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+            'roi_percentage' => 'nullable|numeric|min:0',
+            'duration_months' => 'nullable|integer|min:1',
+            'status' => 'nullable|in:draft,open,closed,sold_out',
+            'image' => 'nullable|image|max:2048',
+            'image_url' => 'nullable|url',
             'description' => 'nullable|string',
         ]);
 
@@ -94,15 +100,19 @@ class PackageController extends Controller
              $package->slug = $slug;
         }
 
-        $package->update([
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'roi_percentage' => $request->roi_percentage,
-            'duration_months' => $request->duration_months,
-            'status' => $request->status,
-            'image' => $request->image,
-        ]);
+        $package->fill($request->except(['image', 'image_url']));
+
+        // 1. Handle File Upload
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('packages', 'public');
+            $package->image = 'storage/' . $path;
+        }
+        // 2. Handle URL fallback (only update if provided)
+        elseif ($request->filled('image_url')) {
+            $package->image = $request->image_url;
+        }
+
+        $package->save();
 
         return redirect()->route('admin.packages.index')->with('status', 'Package updated successfully!');
     }
