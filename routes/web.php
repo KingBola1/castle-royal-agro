@@ -63,7 +63,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Route::resource('admin/packages', \App\Http\Controllers\InvestmentPackageController::class)->except(['show', 'edit', 'update']);
 
     // Admin Withdrawals
-    Route::resource('admin/withdrawals', \App\Http\Controllers\Admin\WithdrawalController::class)->only(['index', 'update']);
+    // Admin Withdrawals (Moved to named group below)
 
     // User Management (New RBAC System)
     Route::get('/users-management', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
@@ -195,6 +195,7 @@ use App\Http\Controllers\Admin\UserController;
 Route::middleware(['auth', 'verified', 'role:Super Admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('packages', \App\Http\Controllers\Admin\PackageController::class);
+    Route::resource('withdrawals', \App\Http\Controllers\Admin\WithdrawalController::class)->only(['index', 'update']);
 });
 
 
