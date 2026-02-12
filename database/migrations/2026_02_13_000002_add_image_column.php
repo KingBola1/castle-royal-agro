@@ -6,25 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('packages', function (Blueprint $table) {
+            // Check if 'image' exists. If not, add it.
             if (!Schema::hasColumn('packages', 'image')) {
+                // We make it nullable so the site doesn't crash if an image is missing
                 $table->string('image')->nullable()->after('status');
             }
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('packages', function (Blueprint $table) {
-            $table->dropColumn('image');
+            if (Schema::hasColumn('packages', 'image')) {
+                $table->dropColumn('image');
+            }
         });
     }
 };
