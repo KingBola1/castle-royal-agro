@@ -39,6 +39,7 @@ return [
 
         'brevo' => [
             'transport' => 'brevo',
+            // This looks for the key in your .env file
         ],
 
         'smtp' => [
