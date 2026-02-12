@@ -39,7 +39,7 @@ return [
 
         'brevo' => [
             'transport' => 'brevo',
-            // This will use the service configuration we set next
+            // This tells Laravel to look at config/services.php
         ],
 
         'smtp' => [
