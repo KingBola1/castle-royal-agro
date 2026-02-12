@@ -9,6 +9,7 @@ use App\Http\Controllers\WithdrawalController;
 use App\Http\Controllers\AdminWithdrawalController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Controllers\Investor\MarketplaceController; // Added Import
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
@@ -21,9 +22,15 @@ Route::get('/', function () {
 });
 
 // --- Investor Dashboard (The Fix) ---
-Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth'])
-    ->name('dashboard');
+// --- Investor Dashboard (The Fix) ---
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // Marketplace Routes
+    Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+    Route::get('/marketplace/{package:slug}', [MarketplaceController::class, 'show'])->name('marketplace.show'); // Binding by slug is better for URLs
+    Route::post('/marketplace/{package}/buy', [MarketplaceController::class, 'store'])->name('marketplace.buy');
+});
 
 // --- Profile Routes ---
 Route::middleware('auth')->group(function () {

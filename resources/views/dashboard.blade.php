@@ -165,7 +165,12 @@
                             </svg>
                         </div>
                         <h3 class="text-lg font-medium text-gray-900">No Investments Yet</h3>
-                        <p class="mt-2 text-gray-500 max-w-sm mx-auto">You haven't purchased any Moringa acres yet.</p>
+                        <p class="mt-2 text-gray-500 max-w-sm mx-auto">You haven't purchased any packages yet.</p>
+                        <div class="mt-6">
+                            <a href="{{ route('marketplace.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
+                                Browse Marketplace
+                            </a>
+                        </div>
                     </div>
                 @else
                     <div class="overflow-x-auto">
@@ -174,10 +179,9 @@
                                 <tr>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount (GH₵)</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROI Rate</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exp. Profit</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acres</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount Invested</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exp. ROI</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 </tr>
                             </thead>
@@ -188,25 +192,23 @@
                                             {{ $investment->created_at->format('M d, Y') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                {{ $investment->package_name ?? 'Custom Investment' }}
-                                            </span>
+                                            {{ $investment->package->name ?? 'N/A' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $investment->units }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                            {{ number_format($investment->amount, 2) }}
+                                            GH₵ {{ number_format($investment->amount_invested, 2) }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $investment->roi_percentage ?? 'N/A' }}%
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-700">
-                                            GH₵ {{ number_format($investment->projected_profit, 2) }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ $investment->acres }} Acres
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
+                                            GH₵ {{ number_format($investment->expected_roi, 2) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 uppercase">
-                                                {{ $investment->status }}
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                @if($investment->status === 'active') bg-green-100 text-green-800 
+                                                @elseif($investment->status === 'pending') bg-yellow-100 text-yellow-800
+                                                @else bg-gray-100 text-gray-800 @endif">
+                                                {{ ucfirst($investment->status) }}
                                             </span>
                                         </td>
                                     </tr>

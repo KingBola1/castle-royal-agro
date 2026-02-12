@@ -20,7 +20,7 @@ class DashboardController extends Controller
                                                      // But based on the view, it seems we display this directly.
 
         // Fetch Investment History
-        $investments = $user->investments()->latest()->get();
+        $investments = $user->investments()->with('package')->latest()->get();
 
         return view('dashboard', compact('user', 'totalInvested', 'activeAcres', 'projectedRoi', 'investments'));
     }

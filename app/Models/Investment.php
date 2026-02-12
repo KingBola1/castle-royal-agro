@@ -16,6 +16,7 @@ class Investment extends Model
         'units',
         'expected_roi',
         'status',
+        'payment_reference',
     ];
 
     protected $casts = [
