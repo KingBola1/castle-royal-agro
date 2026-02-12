@@ -16,28 +16,24 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <!-- Super Admin Only Link -->
-                    @can('manage users')
-                    <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
-                        {{ __('User Management') }}
-                    </x-nav-link>
-                    @endcan
+                    <!-- Super Admin Menu -->
                     @role('Super Admin')
-                    <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
-                        {{ __('Packages') }}
-                    </x-nav-link>
-                    @endrole
-                    @if(Auth::user()->role === 'super_admin' || Auth::user()->role === 'admin')
-                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                            {{ __('Admin Panel') }}
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                            {{ __('User Management') }}
                         </x-nav-link>
+
                         <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
                             {{ __('Packages') }}
                         </x-nav-link>
+
                         <x-nav-link :href="route('admin.withdrawals.index')" :active="request()->routeIs('admin.withdrawals.*')">
                             {{ __('Withdrawal Requests') }}
                         </x-nav-link>
-                    @endif
+
+                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                            {{ __('Admin Panel') }}
+                        </x-nav-link>
+                    @endrole
                 </div>
             </div>
 
@@ -93,17 +89,24 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            @if(Auth::user()->role === 'super_admin' || Auth::user()->role === 'admin')
-                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                    {{ __('Admin Panel') }}
+            <!-- Super Admin Menu (Mobile) -->
+            @role('Super Admin')
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                    {{ __('User Management') }}
                 </x-responsive-nav-link>
+
                 <x-responsive-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
                     {{ __('Packages') }}
                 </x-responsive-nav-link>
+
                 <x-responsive-nav-link :href="route('admin.withdrawals.index')" :active="request()->routeIs('admin.withdrawals.*')">
                     {{ __('Withdrawals') }}
                 </x-responsive-nav-link>
-            @endif
+                
+                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                    {{ __('Admin Panel') }}
+                </x-responsive-nav-link>
+            @endrole
         </div>
 
         <!-- Responsive Settings Options -->
