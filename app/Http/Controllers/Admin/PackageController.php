@@ -52,13 +52,27 @@ class PackageController extends Controller
         $data = $request->except(['image', 'image_url']);
         $data['slug'] = $slug;
 
-        // 1. Handle File Upload
+        // 1. Handle File Upload (Native SDK)
         if ($request->hasFile('image')) {
-            $uploadedFileUrl = cloudinary()->upload($request->file('image')->getRealPath(), [
+            // Fetch URL safely bypassing Laravel's config cache entirely
+            $cloudUrl = $_SERVER['CLOUDINARY_URL'] ?? $_ENV['CLOUDINARY_URL'] ?? env('CLOUDINARY_URL');
+
+            if (empty($cloudUrl)) {
+                return back()->withErrors(['image' => 'CRITICAL: Cloudinary URL is missing from server.']);
+            }
+
+            // Initialize Native PHP SDK directly
+            $cloudinary = new \Cloudinary\Cloudinary($cloudUrl);
+
+            // Execute upload
+            $response = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath(), [
                 'folder' => 'castle_royal_packages'
-            ])->getSecurePath();
-            $data['image'] = $uploadedFileUrl;
-        } elseif ($request->filled('image_url')) {
+            ]);
+
+            $data['image'] = $response['secure_url'];
+        } 
+        // 2. Handle URL fallback
+        elseif ($request->filled('image_url')) {
             $data['image'] = $request->image_url;
         }
 
@@ -102,12 +116,24 @@ class PackageController extends Controller
 
         $package->fill($request->except(['image', 'image_url']));
 
-        // 1. Handle File Upload
+        // 1. Handle File Upload (Native SDK)
         if ($request->hasFile('image')) {
-            $uploadedFileUrl = cloudinary()->upload($request->file('image')->getRealPath(), [
+            // Fetch URL safely bypassing Laravel's config cache entirely
+            $cloudUrl = $_SERVER['CLOUDINARY_URL'] ?? $_ENV['CLOUDINARY_URL'] ?? env('CLOUDINARY_URL');
+
+            if (empty($cloudUrl)) {
+                return back()->withErrors(['image' => 'CRITICAL: Cloudinary URL is missing from server.']);
+            }
+
+            // Initialize Native PHP SDK directly
+            $cloudinary = new \Cloudinary\Cloudinary($cloudUrl);
+
+            // Execute upload
+            $response = $cloudinary->uploadApi()->upload($request->file('image')->getRealPath(), [
                 'folder' => 'castle_royal_packages'
-            ])->getSecurePath();
-            $package->image = $uploadedFileUrl;
+            ]);
+
+            $package->image = $response['secure_url'];
         } 
         // 2. Handle URL fallback
         elseif ($request->filled('image_url')) {
