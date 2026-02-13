@@ -203,6 +203,11 @@ Route::middleware(['auth', 'verified', 'role:Super Admin'])->prefix('admin')->na
     Route::resource('users', UserController::class);
     Route::resource('packages', \App\Http\Controllers\Admin\PackageController::class);
     Route::resource('withdrawals', \App\Http\Controllers\Admin\WithdrawalController::class)->only(['index', 'update']);
+    
+    // Admin Investment Management
+    Route::get('/investments', [\App\Http\Controllers\Admin\InvestmentController::class, 'index'])->name('investments.index');
+    Route::post('/investments/{investment}/approve', [\App\Http\Controllers\Admin\InvestmentController::class, 'approve'])->name('investments.approve');
+    Route::post('/investments/{investment}/reject', [\App\Http\Controllers\Admin\InvestmentController::class, 'reject'])->name('investments.reject');
 });
 
 
