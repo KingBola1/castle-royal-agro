@@ -34,7 +34,15 @@ class InvestmentController extends Controller
             $investment->start_date = now();
         }
 
+
         $investment->save();
+
+        // Notify Investor
+        try {
+            \Illuminate\Support\Facades\Mail::to($investment->user->email)->send(new \App\Mail\InvestmentApproved($investment));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send investment approval email: ' . $e->getMessage());
+        }
 
         return back()->with('success', 'Investment approved successfully.');
     }

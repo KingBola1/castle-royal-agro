@@ -21,7 +21,11 @@ class AdminController extends Controller
     {
         // Get all users, ordered by newest first
         $users = User::orderBy('created_at', 'desc')->paginate(10);
-        return view('admin.dashboard', compact('users'));
+        
+        // Count Pending Investments for Dashboard Alert
+        $pendingInvestmentsCount = Investment::where('status', 'pending')->count();
+        
+        return view('admin.dashboard', compact('users', 'pendingInvestmentsCount'));
     }
 
     // 2. Show the "Manage User" Page

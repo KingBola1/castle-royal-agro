@@ -8,6 +8,33 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
+            @if(isset($pendingInvestmentsCount) && $pendingInvestmentsCount > 0)
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 mb-8 shadow-sm sm:rounded-lg">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <h3 class="text-sm leading-5 font-bold text-red-800">
+                            Attention Required
+                        </h3>
+                        <div class="mt-2 text-sm leading-5 text-red-700">
+                            <p>You have <strong>{{ $pendingInvestmentsCount }}</strong> pending investment request(s) waiting for approval.</p>
+                        </div>
+                        <div class="mt-4">
+                            <div class="-mx-2 -my-1.5 flex">
+                                <a href="{{ route('admin.investments.index') }}" class="px-2 py-1.5 rounded-md text-sm leading-5 font-medium text-red-800 hover:bg-red-100 focus:outline-none focus:bg-red-100 transition ease-in-out duration-150">
+                                    View Pending Investments &rarr;
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-white border-b border-gray-200">
                     <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-red-500">

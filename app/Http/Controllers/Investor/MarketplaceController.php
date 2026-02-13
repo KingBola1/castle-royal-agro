@@ -43,7 +43,7 @@ class MarketplaceController extends Controller
 
 
         // 3. Create Investment
-        Investment::create([
+        $investment = Investment::create([
             'user_id' => Auth::id(),
             'package_id' => $package->id,
             'units' => $request->units,
@@ -52,6 +52,14 @@ class MarketplaceController extends Controller
             'status' => 'pending', // Waiting admin approval
             'payment_reference' => $request->payment_reference,
         ]);
+
+        // Send Alert to Admin
+        try {
+            \Illuminate\Support\Facades\Mail::to('kwamerahman83@gmail.com')->send(new \App\Mail\NewInvestmentAlert($investment));
+        } catch (\Exception $e) {
+            // Log error but don't fail the request
+            \Illuminate\Support\Facades\Log::error('Failed to send investment alert email: ' . $e->getMessage());
+        }
 
         // 4. Redirect
         return redirect()->route('dashboard')->with('status', 'Investment request submitted successfully! Pending approval.');
