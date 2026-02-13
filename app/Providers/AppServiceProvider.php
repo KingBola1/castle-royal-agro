@@ -12,7 +12,16 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // 1. HARD OVERRIDE: Fetch directly from the Linux Server to bypass Laravel Cache
+        $cloudinaryUrl = $_SERVER['CLOUDINARY_URL'] ?? $_ENV['CLOUDINARY_URL'] ?? env('CLOUDINARY_URL');
+
+        // 2. Safety Catch (Throws clear error if Render is actually missing the key)
+        if (!app()->runningInConsole() && empty($cloudinaryUrl)) {
+            throw new \Exception("CRITICAL ERROR: CLOUDINARY_URL is completely missing from Render.");
+        }
+
+        // 3. Force Inject into Laravel's Runtime Memory
+        config(['cloudinary.cloud_url' => $cloudinaryUrl]);
     }
 
     /**
