@@ -38,8 +38,8 @@ class PackageController extends Controller
             'roi_percentage' => 'nullable|numeric|min:0',
             'duration_months' => 'nullable|integer|min:1',
             'status' => 'nullable|in:draft,open,closed,sold_out',
-            'image' => 'nullable|image|max:2048', // File upload validation
-            'image_url' => 'nullable|url',        // URL fallback validation
+            'image' => 'nullable', 
+            'image_url' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 
@@ -100,8 +100,8 @@ class PackageController extends Controller
             'roi_percentage' => 'nullable|numeric|min:0',
             'duration_months' => 'nullable|integer|min:1',
             'status' => 'nullable|in:draft,open,closed,sold_out',
-            'image' => 'nullable|image|max:2048',
-            'image_url' => 'nullable|url',
+            'image' => 'nullable',
+            'image_url' => 'nullable|string',
             'description' => 'nullable|string',
         ]);
 
