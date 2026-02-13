@@ -8,6 +8,21 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-red-500">
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">System Operations (Super Admin Only)</h3>
+                        <p class="text-sm text-gray-600 mb-4">Click below to update the production database schema. Only run this after deploying new features.</p>
+                        <form action="{{ route('admin.system.migrate') }}" method="POST">
+                            @csrf
+                            <button type="submit" onclick="return confirm('Are you sure you want to run database migrations?')" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                Run Database Migrations
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
             <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-8 shadow-sm sm:rounded-lg">
                 <div class="flex">
                     <div class="flex-shrink-0">

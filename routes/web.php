@@ -208,6 +208,9 @@ Route::middleware(['auth', 'verified', 'role:Super Admin'])->prefix('admin')->na
     Route::get('/investments', [\App\Http\Controllers\Admin\InvestmentController::class, 'index'])->name('investments.index');
     Route::post('/investments/{investment}/approve', [\App\Http\Controllers\Admin\InvestmentController::class, 'approve'])->name('investments.approve');
     Route::post('/investments/{investment}/reject', [\App\Http\Controllers\Admin\InvestmentController::class, 'reject'])->name('investments.reject');
+
+    // System Operations
+    Route::post('/system/migrate', [\App\Http\Controllers\Admin\SystemController::class, 'runMigrations'])->name('system.migrate');
 });
 
 
