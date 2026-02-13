@@ -13,7 +13,7 @@
                 <div class="md:col-span-2 space-y-6">
                     <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                         @if($package->image)
-                            <img src="{{ asset($package->image) }}" alt="{{ $package->name }}" class="w-full h-80 object-cover">
+                            <img src="{{ $package->image }}" alt="{{ $package->name }}" class="w-full h-80 object-cover">
                         @endif
                         <div class="p-6">
                             <h3 class="text-2xl font-bold mb-4">Investment Details</h3>

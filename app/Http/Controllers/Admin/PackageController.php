@@ -54,11 +54,11 @@ class PackageController extends Controller
 
         // 1. Handle File Upload
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('packages', 'public');
-            $data['image'] = 'storage/' . $path;
-        }
-        // 2. Handle URL fallback
-        elseif ($request->filled('image_url')) {
+            $uploadedFileUrl = cloudinary()->upload($request->file('image')->getRealPath(), [
+                'folder' => 'castle_royal_packages'
+            ])->getSecurePath();
+            $data['image'] = $uploadedFileUrl;
+        } elseif ($request->filled('image_url')) {
             $data['image'] = $request->image_url;
         }
 
@@ -104,10 +104,12 @@ class PackageController extends Controller
 
         // 1. Handle File Upload
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('packages', 'public');
-            $package->image = 'storage/' . $path;
-        }
-        // 2. Handle URL fallback (only update if provided)
+            $uploadedFileUrl = cloudinary()->upload($request->file('image')->getRealPath(), [
+                'folder' => 'castle_royal_packages'
+            ])->getSecurePath();
+            $package->image = $uploadedFileUrl;
+        } 
+        // 2. Handle URL fallback
         elseif ($request->filled('image_url')) {
             $package->image = $request->image_url;
         }
