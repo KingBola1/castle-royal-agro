@@ -260,3 +260,10 @@ Route::get('/force-verify', function () {
 
     return redirect('/dashboard')->with('status', 'You have been manually verified!');
 });
+
+// --- Cache Clearing Route (Emergency Fix) ---
+Route::get('/clear-cache', function() {
+    Artisan::call('config:clear');
+    Artisan::call('cache:clear');
+    return "Config Cleared! Brevo should work now.";
+});

@@ -29,7 +29,7 @@ class AppServiceProvider extends ServiceProvider
                 new \Symfony\Component\Mailer\Transport\Dsn(
                     'brevo+api',
                     'default',
-                    config('services.brevo.key')
+                    config('services.brevo.key') // user (API key)
                 )
             );
         });
