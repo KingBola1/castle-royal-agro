@@ -34,9 +34,13 @@ class DashboardController extends Controller
         // Check if relationship exists first. Use 'withdrawals' relationship.
         $totalWithdrawn = $user->withdrawals()->where('status', 'approved')->sum('amount');
 
+        // 5. Total Amount Left (Available Balance)
+        // This represents the remaining funds available after withdrawals
+        $totalAmountLeft = $projectedRoi - $totalWithdrawn;
+
         // Fetch Investment History
         $investments = $user->investments()->with('package')->latest()->get();
 
-        return view('dashboard', compact('user', 'totalInvested', 'activeAcres', 'projectedRoi', 'totalWithdrawn', 'investments'));
+        return view('dashboard', compact('user', 'totalInvested', 'activeAcres', 'projectedRoi', 'totalWithdrawn', 'totalAmountLeft', 'investments'));
     }
 }

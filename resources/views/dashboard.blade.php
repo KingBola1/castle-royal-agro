@@ -81,6 +81,19 @@
                     <p class="text-sm text-gray-400 mt-2">Successful Payouts</p>
                 </div>
 
+                {{-- Card 3: Total Amount Left --}}
+                <div class="bg-white overflow-hidden shadow-lg rounded-xl p-8 border border-gray-100 hover:shadow-2xl transition duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Amount Left</h4>
+                        <div class="p-3 bg-blue-50 rounded-full">
+                            {{-- Icon: Suitcase/Wallet --}}
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                        </div>
+                    </div>
+                    <p class="text-4xl font-extrabold text-amber-900">GH₵ {{ number_format($totalAmountLeft ?? 0, 2) }}</p>
+                    <p class="text-sm text-gray-400 mt-2">Available Balance</p>
+                </div>
+
                 {{-- Card 2: Active Acres --}}
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-green-500">
                     <div class="text-gray-500 text-sm font-medium uppercase tracking-wide">Land Portfolio</div>
