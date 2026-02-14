@@ -73,6 +73,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     // Admin Withdrawals (Moved to named group below)
 
     // User Management (New RBAC System)
+    Route::get('/users-management/create', [App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create'); // MUST be before {user} wildcards
+    Route::post('/users-management', [App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
     Route::get('/users-management', [App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
     Route::get('/users-management/{user}/edit', [App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
     Route::put('/users-management/{user}', [App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');

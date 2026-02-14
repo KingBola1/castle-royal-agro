@@ -20,6 +20,39 @@ class UserController extends Controller
     }
 
     /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $roles = Role::all();
+        return view('admin.users.create', compact('roles'));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|exists:roles,name',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        ]);
+
+        $user->assignRole($request->role);
+        $user->markEmailAsVerified(); // Auto-verify administrative staff
+
+        return redirect()->route('users.index')->with('status', 'New staff member created successfully.');
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(User $user)
