@@ -20,23 +20,20 @@ class DashboardController extends Controller
         // Note: 'units' column holds the acres/quantity
         $activeAcres = $user->investments()->where('status', 'active')->sum('units');
 
-        // 3. Projected ROI: This could be complicated. 
-        // For now, let's sum the 'expected_roi' of active investments? 
-        // Or keep user->projected_roi if that's still relevant?
-        // The user request didn't explicitly ask to change projected_roi logic, but total_invested logic.
-        // Let's keep projectedRoi from the user model for now to avoid breaking it, OR sum it up if intended.
-        // BUT, given we are calculating totalInvested dynamically, we should probably do the same for ROI if possible.
-        // Let's stick to the REQUEST: "Update ... to accurately sum the user's active investments".
-        // It didn't explicitly say "change projected roi", but "total invested".
-        $projectedRoi = $user->projected_roi ?? 0.0; 
+        // 3. Projected ROI: Unify Legacy and New Package Returns
+        $legacyProjectedReturn = $user->projected_roi ?? 0.0;
+        $packageRoi = $user->investments()->where('status', 'active')->sum('expected_roi');
+        
+        // Unified Total Projected Return
+        $projectedRoi = $legacyProjectedReturn + $packageRoi;
 
-        // 4. Total Withdrawn: Sum of APPROVED withdrawals
-        // Check if relationship exists first. Use 'withdrawals' relationship.
+        // 4. Total Withdrawn: Sum of APPROVED withdrawals (For Display)
         $totalWithdrawn = $user->withdrawals()->where('status', 'approved')->sum('amount');
 
         // 5. Total Amount Left (Available Balance)
-        // This represents the remaining funds available after withdrawals
-        $totalAmountLeft = $projectedRoi - $totalWithdrawn;
+        // This represents the true remaining funds: (Unified ROI - [Approved + Pending Withdrawals])
+        $unavailableFunds = $user->withdrawals()->whereIn('status', ['approved', 'pending'])->sum('amount');
+        $totalAmountLeft = max(0, $projectedRoi - $unavailableFunds);
 
         // Fetch Investment History
         $investments = $user->investments()->with('package')->latest()->get();

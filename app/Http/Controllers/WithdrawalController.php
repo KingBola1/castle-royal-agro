@@ -12,10 +12,13 @@ class WithdrawalController extends Controller
     {
         $user = Auth::user();
 
-        // 1. Get Total Projected Return
-        $projectedReturn = \App\Models\Investment::where('user_id', $user->id)
+        // 1. Get Total Projected Return (Unified)
+        $legacyProjectedReturn = $user->projected_roi ?? 0.0;
+        $packageRoi = \App\Models\Investment::where('user_id', $user->id)
             ->where('status', 'active') // Only count active, approved investments
             ->sum('expected_roi');
+
+        $projectedReturn = $legacyProjectedReturn + $packageRoi;
 
         // 2. Get Total Withdrawn AND Pending (to prevent spamming requests)
         $unavailableFunds = Withdrawal::where('user_id', $user->id)
@@ -23,7 +26,7 @@ class WithdrawalController extends Controller
             ->sum('amount');
 
         // 3. Calculate True Available Balance
-        $availableBalance = $projectedReturn - $unavailableFunds;
+        $availableBalance = max(0, $projectedReturn - $unavailableFunds);
 
         return view('withdrawals.create', compact('availableBalance'));
     }
@@ -32,10 +35,13 @@ class WithdrawalController extends Controller
     {
         $user = Auth::user();
 
-        // 1. Get Total Projected Return
-        $projectedReturn = \App\Models\Investment::where('user_id', $user->id)
+        // 1. Get Total Projected Return (Unified)
+        $legacyProjectedReturn = $user->projected_roi ?? 0.0;
+        $packageRoi = \App\Models\Investment::where('user_id', $user->id)
             ->where('status', 'active') // Only count active, approved investments
             ->sum('expected_roi');
+
+        $projectedReturn = $legacyProjectedReturn + $packageRoi;
 
         // 2. Get Total Withdrawn AND Pending (to prevent spamming requests)
         $unavailableFunds = Withdrawal::where('user_id', $user->id)
