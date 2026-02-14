@@ -155,7 +155,13 @@
             </div>
 
             {{-- Section 4: Investment History --}}
-            <h3 class="text-xl font-bold text-amber-900 mb-4 pl-2 border-l-4 border-green-700 mt-8"> Your Investment History</h3>
+            <div class="flex justify-between items-center mt-8 mb-4">
+                <h3 class="text-xl font-bold text-amber-900 pl-2 border-l-4 border-green-700"> Your Investment History</h3>
+                <a href="{{ route('marketplace.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
+                    Browse Marketplace
+                </a>
+            </div>
+
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
                 @if($investments->isEmpty())
                     <div class="p-12 text-center">
@@ -166,11 +172,6 @@
                         </div>
                         <h3 class="text-lg font-medium text-gray-900">No Investments Yet</h3>
                         <p class="mt-2 text-gray-500 max-w-sm mx-auto">You haven't purchased any packages yet.</p>
-                        <div class="mt-6">
-                            <a href="{{ route('marketplace.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
-                                Browse Marketplace
-                            </a>
-                        </div>
                     </div>
                 @else
                     <div class="overflow-x-auto">
