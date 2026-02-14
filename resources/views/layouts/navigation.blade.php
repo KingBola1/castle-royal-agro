@@ -17,7 +17,7 @@
                     </x-nav-link>
 
                     <!-- Super Admin Menu -->
-                    @role('Super Admin')
+                    @hasanyrole('Super Admin|Admin')
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                             {{ __('User Management') }}
                         </x-nav-link>
@@ -37,7 +37,7 @@
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Admin Panel') }}
                         </x-nav-link>
-                    @endrole
+                    @endhasanyrole
                 </div>
             </div>
 
@@ -94,7 +94,7 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             <!-- Super Admin Menu (Mobile) -->
-            @role('Super Admin')
+            @hasanyrole('Super Admin|Admin')
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                     {{ __('User Management') }}
                 </x-responsive-nav-link>
@@ -114,7 +114,7 @@
                 <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                     {{ __('Admin Panel') }}
                 </x-responsive-nav-link>
-            @endrole
+            @endhasanyrole
         </div>
 
         <!-- Responsive Settings Options -->
