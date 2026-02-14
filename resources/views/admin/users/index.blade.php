@@ -66,6 +66,20 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                         <a href="{{ route('users.edit', $user->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit Roles</a>
                                         <a href="{{ route('admin.users.show', $user->id) }}" class="text-gray-600 hover:text-gray-900">View Profile</a>
+
+                                        @role('System Owner')
+                                            @if($user->status === 'active')
+                                                <form action="{{ route('admin.users.suspend', $user->id) }}" method="POST" class="inline-block ml-3" onsubmit="return confirm('KILL SWITCH: Are you sure you want to suspend this user?');">
+                                                    @csrf
+                                                    <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Suspend</button>
+                                                </form>
+                                            @else
+                                                <form action="{{ route('admin.users.restore', $user->id) }}" method="POST" class="inline-block ml-3" onsubmit="return confirm('Are you sure you want to restore this user?');">
+                                                    @csrf
+                                                    <button type="submit" class="text-green-600 hover:text-green-900 font-bold">Restore</button>
+                                                </form>
+                                            @endif
+                                        @endrole
                                     </td>
                                 </tr>
                             @endforeach

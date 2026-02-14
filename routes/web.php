@@ -203,6 +203,8 @@ use App\Http\Controllers\Admin\UserController;
 
 Route::middleware(['auth', 'verified', 'role:Super Admin|Admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class);
+    Route::post('/users/{id}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
+    Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
     Route::resource('packages', \App\Http\Controllers\Admin\PackageController::class);
     Route::get('/withdrawals', [\App\Http\Controllers\Admin\WithdrawalController::class, 'index'])->name('withdrawals.index');
     Route::post('/withdrawals/{id}/approve', [\App\Http\Controllers\Admin\WithdrawalController::class, 'approve'])->name('withdrawals.approve');

@@ -91,4 +91,29 @@ class UserController extends Controller
 
         return redirect()->route('users.index')->with('status', 'User roles and permissions updated successfully.');
     }
+    public function suspend($id)
+    {
+        if (!auth()->user()->hasRole('System Owner')) {
+            abort(403, 'Only the System Owner can suspend users.');
+        }
+
+        $user = User::findOrFail($id);
+        $user->status = 'banned';
+        $user->save();
+
+        return back()->with('status', "User {$user->name} has been suspended.");
+    }
+
+    public function restore($id)
+    {
+        if (!auth()->user()->hasRole('System Owner')) {
+            abort(403, 'Only the System Owner can restore users.');
+        }
+
+        $user = User::findOrFail($id);
+        $user->status = 'active';
+        $user->save();
+
+        return back()->with('status', "User {$user->name} has been restored.");
+    }
 }
