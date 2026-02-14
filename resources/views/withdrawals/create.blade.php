@@ -19,7 +19,7 @@
                             </div>
                             <div class="ml-3">
                                 <p class="text-sm text-blue-700">
-                                    Available Balance: <span class="font-bold">GH₵ {{ number_format(Auth::user()->projected_roi, 2) }}</span>
+                                    Available Balance: <span class="font-bold">GH₵ {{ number_format($availableBalance, 2) }}</span>
                                 </p>
                             </div>
                         </div>
@@ -34,10 +34,11 @@
                                    type="number" 
                                    name="amount" 
                                    value="{{ old('amount') }}" 
+                                   max="{{ $availableBalance }}"
                                    required 
                                    autofocus />
                             @error('amount')
-                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
                             @enderror
                         </div>
 

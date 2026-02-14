@@ -10,21 +10,47 @@ class WithdrawalController extends Controller
 {
     public function create()
     {
-        return view('withdrawals.create');
+        $user = Auth::user();
+
+        // 1. Get Total Projected Return
+        $projectedReturn = \App\Models\Investment::where('user_id', $user->id)
+            ->where('status', 'active') // Only count active, approved investments
+            ->sum('expected_roi');
+
+        // 2. Get Total Withdrawn AND Pending (to prevent spamming requests)
+        $unavailableFunds = Withdrawal::where('user_id', $user->id)
+            ->whereIn('status', ['approved', 'pending'])
+            ->sum('amount');
+
+        // 3. Calculate True Available Balance
+        $availableBalance = $projectedReturn - $unavailableFunds;
+
+        return view('withdrawals.create', compact('availableBalance'));
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'amount' => 'required|numeric|min:1',
-            'payment_details' => 'required|string',
-        ]);
-
         $user = Auth::user();
 
-        if ($request->amount > $user->projected_roi) {
-            return back()->withErrors(['amount' => 'Insufficient funds in Projected ROI balance.']);
-        }
+        // 1. Get Total Projected Return
+        $projectedReturn = \App\Models\Investment::where('user_id', $user->id)
+            ->where('status', 'active') // Only count active, approved investments
+            ->sum('expected_roi');
+
+        // 2. Get Total Withdrawn AND Pending (to prevent spamming requests)
+        $unavailableFunds = Withdrawal::where('user_id', $user->id)
+            ->whereIn('status', ['approved', 'pending'])
+            ->sum('amount');
+
+        // 3. Calculate True Available Balance
+        $availableBalance = max(0, $projectedReturn - $unavailableFunds);
+
+        $request->validate([
+            'amount' => ['required', 'numeric', 'min:1', 'max:' . $availableBalance],
+            'payment_details' => 'required|string',
+        ], [
+            'amount.max' => 'You cannot withdraw more than your available balance of GH₵ ' . number_format($availableBalance, 2),
+        ]);
 
         Withdrawal::create([
             'user_id' => $user->id,
