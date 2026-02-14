@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\Models\Withdrawal;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -14,23 +15,42 @@ class WithdrawalApproved extends Mailable
     use Queueable, SerializesModels;
 
     public $withdrawal;
-    public $user;
 
     /**
      * Create a new message instance.
      */
-    public function __construct($withdrawal, $user)
+    public function __construct(Withdrawal $withdrawal)
     {
         $this->withdrawal = $withdrawal;
-        $this->user = $user;
+    }
+
+    /**
+     * Get the message envelope.
+     */
+    public function envelope(): Envelope
+    {
+        return new Envelope(
+            subject: 'Withdrawal Request Approved',
+        );
     }
 
     /**
      * Get the message content definition.
      */
-    public function build()
+    public function content(): Content
     {
-        return $this->subject('🎉 Withdrawal Approved - Castle Royal Agro')
-                    ->view('emails.withdrawals.approved');
+        return new Content(
+            view: 'emails.investor.withdrawal_approved',
+        );
+    }
+
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
+    public function attachments(): array
+    {
+        return [];
     }
 }

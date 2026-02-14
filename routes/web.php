@@ -202,7 +202,9 @@ use App\Http\Controllers\Admin\UserController;
 Route::middleware(['auth', 'verified', 'role:Super Admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('packages', \App\Http\Controllers\Admin\PackageController::class);
-    Route::resource('withdrawals', \App\Http\Controllers\Admin\WithdrawalController::class)->only(['index', 'update']);
+    Route::get('/withdrawals', [\App\Http\Controllers\Admin\WithdrawalController::class, 'index'])->name('withdrawals.index');
+    Route::post('/withdrawals/{id}/approve', [\App\Http\Controllers\Admin\WithdrawalController::class, 'approve'])->name('withdrawals.approve');
+    Route::post('/withdrawals/{id}/reject', [\App\Http\Controllers\Admin\WithdrawalController::class, 'reject'])->name('withdrawals.reject');
     
     // Admin Investment Management
     Route::get('/investments', [\App\Http\Controllers\Admin\InvestmentController::class, 'index'])->name('investments.index');

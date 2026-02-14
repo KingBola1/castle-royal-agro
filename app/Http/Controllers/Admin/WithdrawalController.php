@@ -20,17 +20,35 @@ class WithdrawalController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Withdrawal $withdrawal)
+    public function approve($id)
     {
-        $request->validate([
-            'status' => 'required|in:pending,approved,rejected',
-        ]);
+        $withdrawal = Withdrawal::findOrFail($id);
 
-        $withdrawal->update(['status' => $request->status]);
+        if ($withdrawal->status !== 'pending') {
+            return back()->with('error', 'This request has already been processed.');
+        }
 
-        // Logic for handling funds/transactions would go here (e.g., deducting balance if approved)
-        // For now, we assume simple status tracking.
+        $withdrawal->update(['status' => 'approved']);
 
-        return redirect()->route('admin.withdrawals.index')->with('status', 'Withdrawal request updated!');
+        // Send Email
+        \Illuminate\Support\Facades\Mail::to($withdrawal->user->email)->send(new \App\Mail\WithdrawalApproved($withdrawal));
+
+        return redirect()->back()->with('status', 'Withdrawal approved and investor notified!');
+    }
+
+    public function reject($id)
+    {
+        $withdrawal = Withdrawal::findOrFail($id);
+
+        if ($withdrawal->status !== 'pending') {
+            return back()->with('error', 'This request has already been processed.');
+        }
+
+        $withdrawal->update(['status' => 'rejected']);
+
+        // Send Email
+        \Illuminate\Support\Facades\Mail::to($withdrawal->user->email)->send(new \App\Mail\WithdrawalRejected($withdrawal));
+
+        return redirect()->back()->with('status', 'Withdrawal rejected and investor notified!');
     }
 }
