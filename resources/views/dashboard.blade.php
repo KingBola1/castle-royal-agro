@@ -112,7 +112,7 @@
                             <div class="text-gray-500 text-sm font-medium uppercase tracking-wide">Projected Cash Return</div>
                             <div class="mt-2 flex items-baseline">
                                 <span class="text-3xl font-extrabold text-gray-900">
-                                    GH₵ {{ number_format(Auth::user()->projected_roi, 2) }}
+                                    GH₵ {{ number_format($projectedRoi, 2) }}
                                 </span>
                                 <span class="ml-2 text-sm font-medium text-gray-500">Available</span>
                             </div>
