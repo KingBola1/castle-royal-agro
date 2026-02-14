@@ -69,6 +69,18 @@
                     <p class="text-sm text-gray-400 mt-2">Acres Secured: {{ $activeAcres }}</p>
                 </div>
 
+                {{-- Card 2: Total Withdrawn --}}
+                <div class="bg-white overflow-hidden shadow-lg rounded-xl p-8 border border-gray-100 hover:shadow-2xl transition duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Withdrawn</h4>
+                        <div class="p-3 bg-red-50 rounded-full">
+                            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                    </div>
+                    <p class="text-4xl font-extrabold text-amber-900">GH₵ {{ number_format($totalWithdrawn ?? 0, 2) }}</p>
+                    <p class="text-sm text-gray-400 mt-2">Successful Payouts</p>
+                </div>
+
                 {{-- Card 2: Active Acres --}}
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-green-500">
                     <div class="text-gray-500 text-sm font-medium uppercase tracking-wide">Land Portfolio</div>

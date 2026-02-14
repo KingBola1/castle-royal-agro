@@ -13,15 +13,30 @@ class DashboardController extends Controller
         $user = Auth::user();
 
         // Calculate Financials from the User Model
-        // Assumption: These fields are updated by the Admin when an investment occurs
-        $totalInvested = $user->total_invested ?? 0.00;
-        $activeAcres = $user->active_acres ?? 0.0;
-        $projectedRoi = $user->projected_roi ?? 0.0; // This should be a value (e.g. 2500), not a percentage if you want to display % calculation.
-                                                     // But based on the view, it seems we display this directly.
+        // 1. Total Invested: Sum of ACTIVE investments
+        $totalInvested = $user->investments()->where('status', 'active')->sum('amount_invested');
+
+        // 2. Active Acres: Sum of units (acres) of ACTIVE investments
+        // Note: 'units' column holds the acres/quantity
+        $activeAcres = $user->investments()->where('status', 'active')->sum('units');
+
+        // 3. Projected ROI: This could be complicated. 
+        // For now, let's sum the 'expected_roi' of active investments? 
+        // Or keep user->projected_roi if that's still relevant?
+        // The user request didn't explicitly ask to change projected_roi logic, but total_invested logic.
+        // Let's keep projectedRoi from the user model for now to avoid breaking it, OR sum it up if intended.
+        // BUT, given we are calculating totalInvested dynamically, we should probably do the same for ROI if possible.
+        // Let's stick to the REQUEST: "Update ... to accurately sum the user's active investments".
+        // It didn't explicitly say "change projected roi", but "total invested".
+        $projectedRoi = $user->projected_roi ?? 0.0; 
+
+        // 4. Total Withdrawn: Sum of APPROVED withdrawals
+        // Check if relationship exists first. Use 'withdrawals' relationship.
+        $totalWithdrawn = $user->withdrawals()->where('status', 'approved')->sum('amount');
 
         // Fetch Investment History
         $investments = $user->investments()->with('package')->latest()->get();
 
-        return view('dashboard', compact('user', 'totalInvested', 'activeAcres', 'projectedRoi', 'investments'));
+        return view('dashboard', compact('user', 'totalInvested', 'activeAcres', 'projectedRoi', 'totalWithdrawn', 'investments'));
     }
 }
