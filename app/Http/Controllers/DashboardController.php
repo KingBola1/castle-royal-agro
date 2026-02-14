@@ -12,11 +12,6 @@ class DashboardController extends Controller
         // 1. Get the currently logged-in user
         $user = Auth::user();
 
-        // Security: Redirect Admin users to the Admin Panel
-        if ($user->hasAnyRole(['Super Admin', 'Admin', 'super_admin', 'admin'])) {
-            return redirect()->route('admin.dashboard');
-        }
-
         // Calculate Financials from the User Model
         // 1. Total Invested: Sum of ACTIVE investments
         $totalInvested = $user->investments()->where('status', 'active')->sum('amount_invested');
