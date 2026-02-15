@@ -201,19 +201,25 @@ Route::get('/fix-roles', function () {
 
 use App\Http\Controllers\Admin\UserController;
 
-Route::middleware(['auth', 'verified', 'role:Super Admin|Admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('users', UserController::class);
-    Route::post('/users/{id}/suspend', [UserController::class, 'suspend'])->name('users.suspend');
-    Route::post('/users/{id}/restore', [UserController::class, 'restore'])->name('users.restore');
+// --- 1. OPERATIONAL ROUTES (Accessible by all Staff & Admins) ---
+Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admin|Admin|admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::resource('packages', \App\Http\Controllers\Admin\PackageController::class);
+    
     Route::get('/withdrawals', [\App\Http\Controllers\Admin\WithdrawalController::class, 'index'])->name('withdrawals.index');
     Route::post('/withdrawals/{id}/approve', [\App\Http\Controllers\Admin\WithdrawalController::class, 'approve'])->name('withdrawals.approve');
     Route::post('/withdrawals/{id}/reject', [\App\Http\Controllers\Admin\WithdrawalController::class, 'reject'])->name('withdrawals.reject');
-    
+
     // Admin Investment Management
     Route::get('/investments', [\App\Http\Controllers\Admin\InvestmentController::class, 'index'])->name('investments.index');
     Route::post('/investments/{investment}/approve', [\App\Http\Controllers\Admin\InvestmentController::class, 'approve'])->name('investments.approve');
     Route::post('/investments/{investment}/reject', [\App\Http\Controllers\Admin\InvestmentController::class, 'reject'])->name('investments.reject');
+});
+
+// --- 2. HIGH SECURITY ROUTES (System Owner & Super Admin ONLY) ---
+Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
+    Route::post('/users/{id}/suspend', [\App\Http\Controllers\Admin\UserController::class, 'suspend'])->name('users.suspend');
+    Route::post('/users/{id}/restore', [\App\Http\Controllers\Admin\UserController::class, 'restore'])->name('users.restore');
 
     // System Operations
     Route::post('/system/migrate', [\App\Http\Controllers\Admin\SystemController::class, 'runMigrations'])->name('system.migrate');

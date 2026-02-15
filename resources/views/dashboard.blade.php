@@ -1,7 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-amber-900 leading-tight">
-            {{ __('Investor Portfolio') }}
+            @if(auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin']))
+                Staff Dashboard
+            @else
+                Investor Portfolio
+            @endif
         </h2>
     </x-slot>
 
