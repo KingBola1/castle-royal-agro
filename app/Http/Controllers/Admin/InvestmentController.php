@@ -38,17 +38,16 @@ class InvestmentController extends Controller
             $investment->start_date = now();
         }
 
-
         $investment->save();
 
-        // Notify Investor
+        // Notify Investor (Try/Catch to ensure process continues even if email fails)
         try {
             \Illuminate\Support\Facades\Mail::to($investment->user->email)->send(new \App\Mail\InvestmentApproved($investment));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Failed to send investment approval email: ' . $e->getMessage());
         }
 
-        // Non-Repudiation Logging (Investment Approved)
+        // Non-Repudiation Logging (Guaranteed Execution)
         \App\Models\AuditLog::create([
             'user_id' => $investment->user_id,
             'admin_id' => auth()->id(),
@@ -59,9 +58,6 @@ class InvestmentController extends Controller
         return back()->with('success', 'Investment approved successfully.');
     }
 
-    /**
-     * Reject the specified investment.
-     */
     public function reject(Investment $investment)
     {
         if (!auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) && !auth()->user()->hasDirectPermission('manage_investments')) {
@@ -75,7 +71,7 @@ class InvestmentController extends Controller
         $investment->status = 'rejected';
         $investment->save();
 
-        // Non-Repudiation Logging (Investment Rejected)
+        // Non-Repudiation Logging (Guaranteed Execution)
         \App\Models\AuditLog::create([
             'user_id' => $investment->user_id,
             'admin_id' => auth()->id(),
