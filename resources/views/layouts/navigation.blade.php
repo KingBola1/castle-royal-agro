@@ -17,7 +17,8 @@
                     </x-nav-link>
 
                     <!-- Strict Admin Menu (System Owner & Super Admin only) -->
-                    @hasanyrole('System Owner|Super Admin')
+                    <!-- Strict Admin Menu (System Owner & Super Admin only) -->
+                    @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']))
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                             {{ __('User Management') }}
                         </x-nav-link>
@@ -25,10 +26,11 @@
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Admin Panel') }}
                         </x-nav-link>
-                    @endhasanyrole
+                    @endif
 
                     <!-- Operational Admin Menu (Includes regular Admin) -->
-                    @hasanyrole('System Owner|Super Admin|Admin')
+                    <!-- Operational Admin Menu (Includes regular Admin) -->
+                    @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin']))
                         <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
                             {{ __('Packages') }}
                         </x-nav-link>
@@ -40,7 +42,7 @@
                         <x-nav-link :href="route('admin.withdrawals.index')" :active="request()->routeIs('admin.withdrawals.*')">
                             {{ __('Withdrawal Requests') }}
                         </x-nav-link>
-                    @endhasanyrole
+                    @endif
                 </div>
             </div>
 
@@ -97,7 +99,8 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
             <!-- Strict Admin Menu (Mobile) -->
-            @hasanyrole('System Owner|Super Admin')
+            <!-- Strict Admin Menu (Mobile) -->
+            @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']))
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                     {{ __('User Management') }}
                 </x-responsive-nav-link>
@@ -105,10 +108,11 @@
                 <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                     {{ __('Admin Panel') }}
                 </x-responsive-nav-link>
-            @endhasanyrole
+            @endif
 
             <!-- Operational Admin Menu (Mobile) -->
-            @hasanyrole('System Owner|Super Admin|Admin')
+            <!-- Operational Admin Menu (Mobile) -->
+            @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin']))
                 <x-responsive-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
                     {{ __('Packages') }}
                 </x-responsive-nav-link>
@@ -120,7 +124,7 @@
                 <x-responsive-nav-link :href="route('admin.withdrawals.index')" :active="request()->routeIs('admin.withdrawals.*')">
                     {{ __('Withdrawals') }}
                 </x-responsive-nav-link>
-            @endhasanyrole
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->
