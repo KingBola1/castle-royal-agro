@@ -85,6 +85,14 @@ class PackageController extends Controller
         }
 
         Package::create($data);
+        
+        // Non-Repudiation Logging (Package Creation)
+        \App\Models\AuditLog::create([
+            'user_id' => null, // System Action
+            'admin_id' => auth()->id(),
+            'action' => 'Package Created',
+            'details' => "Created investment package '{$request->name}' with price GH₵ " . number_format($request->price ?? 0, 2),
+        ]);
 
         return redirect()->route('admin.packages.index')->with('status', 'Package created successfully!');
     }
@@ -158,6 +166,14 @@ class PackageController extends Controller
 
         $package->save();
 
+        // Non-Repudiation Logging (Package Update)
+        \App\Models\AuditLog::create([
+            'user_id' => null,
+            'admin_id' => auth()->id(),
+            'action' => 'Package Updated',
+            'details' => "Updated investment package '{$package->name}' details.",
+        ]);
+
         return redirect()->route('admin.packages.index')->with('status', 'Package updated successfully!');
     }
 
@@ -171,6 +187,15 @@ class PackageController extends Controller
         }
 
         $package->delete();
+
+        // Non-Repudiation Logging (Package Deletion)
+        \App\Models\AuditLog::create([
+            'user_id' => null,
+            'admin_id' => auth()->id(),
+            'action' => 'Package Deleted',
+            'details' => "Deleted investment package '{$package->name}' permanently.",
+        ]);
+
         return redirect()->route('admin.packages.index')->with('status', 'Package deleted successfully.');
     }
 }
