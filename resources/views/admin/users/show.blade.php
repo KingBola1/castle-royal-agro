@@ -77,7 +77,16 @@
                                 <h3 class="text-lg font-medium text-gray-900 mb-4">Account Actions</h3>
                                 
                                     </select>
-                                    <p class="text-xs text-gray-500 mt-1">Current Role: <strong>{{ $user->role }}</strong></p>
+                                    <p class="text-xs text-gray-500 mt-1">
+                                        Current Role: 
+                                        <span class="font-semibold text-gray-900">
+                                            @forelse($user->roles as $role)
+                                                {{ ucfirst($role->name) }}{{ !$loop->last ? ', ' : '' }}
+                                            @empty
+                                                <span class="text-gray-400">No Role</span>
+                                            @endforelse
+                                        </span>
+                                    </p>
                                 </div>
 
                                 <div class="mb-4">

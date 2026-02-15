@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('investments', function (Blueprint $table) {
-            // Add units column, default to 1 just in case, placed after package_id
-            $table->integer('units')->default(1)->after('package_id');
-        });
+        if (!Schema::hasColumn('investments', 'units')) {
+            Schema::table('investments', function (Blueprint $table) {
+                // Add units column, default to 1 just in case, placed after package_id
+                $table->integer('units')->default(1)->after('package_id');
+            });
+        }
     }
 
     /**

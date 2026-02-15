@@ -35,13 +35,13 @@
                         <div class="mb-6">
                             <h3 class="text-lg font-medium text-gray-900 mb-4">Direct Permissions (Optional)</h3>
                             <p class="text-sm text-gray-500 mb-4">Usually handled by roles, but can be assigned directly here.</p>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 @foreach($permissions as $permission)
                                     <label class="inline-flex items-center">
-                                        <input type="checkbox" name="permissions[]" value="{{ $permission->name }}" 
-                                               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
-                                               {{ $user->hasDirectPermission($permission->name) ? 'checked' : '' }}>
-                                        <span class="ml-2 text-gray-700 capitalize">{{ $permission->name }}</span>
+                                        <input type="checkbox" name="permissions[]" value="{{ $permission->name }}"
+                                        class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                        {{ $user->hasDirectPermission($permission->name) ? 'checked' : '' }}>
+                                        <span class="ml-2 text-sm text-gray-700">{{ ucwords(str_replace('_', ' ', $permission->name)) }}</span>
                                     </label>
                                 @endforeach
                             </div>

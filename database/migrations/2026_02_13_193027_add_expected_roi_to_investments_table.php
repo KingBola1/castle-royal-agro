@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('investments', function (Blueprint $table) {
-            // Add expected_roi column to store calculated financial returns
-            $table->decimal('expected_roi', 15, 2)->nullable()->after('amount_invested');
-        });
+        if (!Schema::hasColumn('investments', 'expected_roi')) {
+            Schema::table('investments', function (Blueprint $table) {
+                // Add expected_roi column to store calculated financial returns
+                $table->decimal('expected_roi', 15, 2)->nullable()->after('amount_invested');
+            });
+        }
     }
 
     /**
