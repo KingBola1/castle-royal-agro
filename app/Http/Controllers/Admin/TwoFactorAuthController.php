@@ -37,10 +37,15 @@ class TwoFactorAuthController extends Controller
         $writer = new Writer($renderer);
         $qrCodeSvg = $writer->writeString($g2faUrl);
 
-        return view('admin.2fa.enable', [
+        return view('admin.2fa.setup', [
             'secret' => $user->google2fa_secret,
             'qrCodeSvg' => $qrCodeSvg
         ]);
+    }
+
+    public function showVerify()
+    {
+        return view('admin.2fa.verify');
     }
 
     public function verify(Request $request)
@@ -52,9 +57,8 @@ class TwoFactorAuthController extends Controller
         $valid = $google2fa->verifyKey($user->google2fa_secret, $request->code);
 
         if ($valid) {
-            // Here you would typically set a session flag or update user status
-            // For Phase 1 Foundation, we just return success
-            return redirect()->back()->with('status', '2FA verified successfully!');
+            session(['2fa_verified' => true]);
+            return redirect()->route('admin.dashboard');
         }
 
         return back()->withErrors(['code' => 'Invalid authentication code.']);
