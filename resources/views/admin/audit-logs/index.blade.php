@@ -30,7 +30,7 @@
                                             {{ $log->created_at->format('M d, Y - h:i A') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600">
-                                            @if($log->admin_id === $log->user_id)
+                                            @if($log->admin_id === $log->user_id && $log->action === 'Withdrawal Requested')
                                                 <span class="text-gray-500 italic">Self-Service</span>
                                             @else
                                                 {{ $log->admin->name ?? 'System' }}
