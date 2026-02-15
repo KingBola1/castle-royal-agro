@@ -223,6 +223,9 @@ Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admi
 
     // System Operations
     Route::post('/system/migrate', [\App\Http\Controllers\Admin\SystemController::class, 'runMigrations'])->name('system.migrate');
+
+    // Global Audit Trail
+    Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
 });
 
 // --- ULTIMATE SECURITY ROUTE (System Owner ONLY) ---
