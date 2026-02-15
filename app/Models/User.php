@@ -47,6 +47,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'projected_roi',
         'momo_details',
         'bank_details',
+        'google2fa_secret', // Added for 2FA
     ];
 
     /**
@@ -57,6 +58,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'google2fa_secret', // Added for 2FA
     ];
 
     /**
