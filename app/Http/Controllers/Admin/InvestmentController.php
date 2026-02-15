@@ -23,6 +23,10 @@ class InvestmentController extends Controller
      */
     public function approve(Investment $investment)
     {
+        if (!auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) && !auth()->user()->hasDirectPermission('manage_investments')) {
+            abort(403, 'Unauthorized. You do not have the required permissions to manage investments.');
+        }
+
         if ($investment->status !== 'pending') {
             return back()->with('error', 'Investment is already processed.');
         }
@@ -52,6 +56,10 @@ class InvestmentController extends Controller
      */
     public function reject(Investment $investment)
     {
+        if (!auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) && !auth()->user()->hasDirectPermission('manage_investments')) {
+            abort(403, 'Unauthorized. You do not have the required permissions to manage investments.');
+        }
+
         if ($investment->status !== 'pending') {
             return back()->with('error', 'Investment is already processed.');
         }

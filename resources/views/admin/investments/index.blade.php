@@ -80,14 +80,18 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             @if($investment->status === 'pending')
                                                 <div class="flex space-x-2">
-                                                    <form action="{{ route('admin.investments.approve', $investment) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve this investment?');">
-                                                        @csrf
-                                                        <button type="submit" class="text-green-600 hover:text-green-900 font-bold">Approve</button>
-                                                    </form>
-                                                    <form action="{{ route('admin.investments.reject', $investment) }}" method="POST" onsubmit="return confirm('Are you sure you want to reject this investment?');">
-                                                        @csrf
-                                                        <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Reject</button>
-                                                    </form>
+                                                    @if(auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) || auth()->user()->hasDirectPermission('manage_investments'))
+                                                        <form action="{{ route('admin.investments.approve', $investment) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve this investment?');">
+                                                            @csrf
+                                                            <button type="submit" class="text-green-600 hover:text-green-900 font-bold">Approve</button>
+                                                        </form>
+                                                        <form action="{{ route('admin.investments.reject', $investment) }}" method="POST" onsubmit="return confirm('Are you sure you want to reject this investment?');">
+                                                            @csrf
+                                                            <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Reject</button>
+                                                        </form>
+                                                    @else
+                                                        <span class="text-gray-400 text-sm italic">Restricted</span>
+                                                    @endif
                                                 </div>
                                             @else
                                                 <span class="text-gray-400">Processed</span>
