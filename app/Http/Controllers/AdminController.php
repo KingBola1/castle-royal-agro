@@ -31,10 +31,8 @@ class AdminController extends Controller
         
         $totalActiveInvestments = 0;
         try {
-            // Try the exact column first
             $totalActiveInvestments = Investment::where('status', 'active')->sum('amount');
         } catch (\Exception $e) {
-            // Fallback to User table if 'amount' column is named differently in investments table
             $totalActiveInvestments = User::sum('total_invested');
         }
 
@@ -47,7 +45,10 @@ class AdminController extends Controller
             }
         } catch (\Exception $e) {}
 
-        $staffCount = User::role(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin'])->count();
+        // THE FIX: Use native Laravel relationships to bypass Spatie's strict exceptions
+        $staffCount = User::whereHas('roles', function($query) {
+            $query->whereIn('name', ['System Owner', 'Super Admin', 'Admin']);
+        })->count();
 
         return view('admin.dashboard', compact(
             'users', 
