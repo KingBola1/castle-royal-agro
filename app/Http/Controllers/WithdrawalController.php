@@ -68,7 +68,7 @@ class WithdrawalController extends Controller
         // Non-Repudiation Logging (Investor Request)
         \App\Models\AuditLog::create([
             'user_id' => $user->id,
-            'admin_id' => null, // Self-service action
+            'admin_id' => $user->id, // HOTFIX: Bypass NOT NULL constraint by logging self as admin
             'action' => 'Withdrawal Requested',
             'details' => "Investor requested withdrawal of GH₵ " . number_format($request->amount, 2) . " via " . $request->payment_details,
         ]);

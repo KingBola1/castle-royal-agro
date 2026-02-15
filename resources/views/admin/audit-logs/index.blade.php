@@ -30,7 +30,11 @@
                                             {{ $log->created_at->format('M d, Y - h:i A') }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold text-indigo-600">
-                                            {{ $log->admin->name ?? 'System' }}
+                                            @if($log->admin_id === $log->user_id)
+                                                <span class="text-gray-500 italic">Self-Service</span>
+                                            @else
+                                                {{ $log->admin->name ?? 'System' }}
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
                                             <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
