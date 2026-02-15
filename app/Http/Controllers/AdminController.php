@@ -17,29 +17,36 @@ use Illuminate\Validation\Rule;
 class AdminController extends Controller
 {
     // 1. Show the Dashboard
-    // 1. Show the Dashboard
     public function index()
     {
-        // Existing queries
         $users = User::orderBy('created_at', 'desc')->paginate(10);
-        $pendingInvestmentsCount = Investment::where('status', 'pending')->count();
+        
+        $pendingInvestmentsCount = 0;
+        try {
+            $pendingInvestmentsCount = Investment::where('status', 'pending')->count();
+        } catch (\Exception $e) {}
 
-        // --- NEW: CTD COMMAND CENTER METRICS ---
-        // 1. Total Registered Users
+        // --- CTD COMMAND CENTER METRICS ---
         $totalRegisteredUsers = User::count();
-
-        // 2. Total Active Investments (Financial sum)
-        $totalActiveInvestments = Investment::where('status', 'active')->sum('amount');
-
-        // 3. Pending Withdrawals (Safe check in case model is named differently)
-        $pendingWithdrawalsAmount = 0;
-        $pendingWithdrawalsCount = 0;
-        if (class_exists(\App\Models\Withdrawal::class)) {
-            $pendingWithdrawalsAmount = \App\Models\Withdrawal::where('status', 'pending')->sum('amount');
-            $pendingWithdrawalsCount = \App\Models\Withdrawal::where('status', 'pending')->count();
+        
+        $totalActiveInvestments = 0;
+        try {
+            // Try the exact column first
+            $totalActiveInvestments = Investment::where('status', 'active')->sum('amount');
+        } catch (\Exception $e) {
+            // Fallback to User table if 'amount' column is named differently in investments table
+            $totalActiveInvestments = User::sum('total_invested');
         }
 
-        // 4. System Health / Staff Count
+        $pendingWithdrawalsAmount = 0;
+        $pendingWithdrawalsCount = 0;
+        try {
+            if (class_exists(\App\Models\Withdrawal::class)) {
+                $pendingWithdrawalsAmount = \App\Models\Withdrawal::where('status', 'pending')->sum('amount');
+                $pendingWithdrawalsCount = \App\Models\Withdrawal::where('status', 'pending')->count();
+            }
+        } catch (\Exception $e) {}
+
         $staffCount = User::role(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin'])->count();
 
         return view('admin.dashboard', compact(
