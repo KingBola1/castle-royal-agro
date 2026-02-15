@@ -65,6 +65,14 @@ class WithdrawalController extends Controller
             'status' => 'pending',
         ]);
 
+        // Non-Repudiation Logging (Investor Request)
+        \App\Models\AuditLog::create([
+            'user_id' => $user->id,
+            'admin_id' => null, // Self-service action
+            'action' => 'Withdrawal Requested',
+            'details' => "Investor requested withdrawal of GH₵ " . number_format($request->amount, 2) . " via " . $request->payment_details,
+        ]);
+
         return redirect()->route('dashboard')->with('status', 'Withdrawal request submitted successfully.');
     }
 }

@@ -27,9 +27,11 @@
                             {{ __('Admin Panel') }}
                         </x-nav-link>
 
-                        <x-nav-link :href="route('admin.audit-logs.index')" :active="request()->routeIs('admin.audit-logs.*')">
-                            {{ __('Audit Logs') }}
-                        </x-nav-link>
+                        @if(auth()->user()->hasRole('System Owner') || auth()->user()->can('view_audit_logs'))
+                            <x-nav-link :href="route('admin.audit-logs.index')" :active="request()->routeIs('admin.audit-logs.*')">
+                                {{ __('Audit Logs') }}
+                            </x-nav-link>
+                        @endif
 
                         @if(auth()->user()->hasRole('System Owner'))
                             <x-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">
@@ -119,9 +121,11 @@
                     {{ __('Admin Panel') }}
                 </x-responsive-nav-link>
 
-                <x-responsive-nav-link :href="route('admin.audit-logs.index')" :active="request()->routeIs('admin.audit-logs.*')">
-                    {{ __('Audit Logs') }}
-                </x-responsive-nav-link>
+                @if(auth()->user()->hasRole('System Owner') || auth()->user()->can('view_audit_logs'))
+                    <x-responsive-nav-link :href="route('admin.audit-logs.index')" :active="request()->routeIs('admin.audit-logs.*')">
+                        {{ __('Audit Logs') }}
+                    </x-responsive-nav-link>
+                @endif
 
                 @if(auth()->user()->hasRole('System Owner'))
                     <x-responsive-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">

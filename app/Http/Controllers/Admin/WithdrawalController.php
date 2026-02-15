@@ -37,6 +37,14 @@ class WithdrawalController extends Controller
         // Send Email
         \Illuminate\Support\Facades\Mail::to($withdrawal->user->email)->send(new \App\Mail\WithdrawalApproved($withdrawal));
 
+        // Non-Repudiation Logging (Admin Approval)
+        \App\Models\AuditLog::create([
+            'user_id' => $withdrawal->user_id,
+            'admin_id' => auth()->id(),
+            'action' => 'Withdrawal Approved',
+            'details' => "Approved withdrawal of GH₵ " . number_format($withdrawal->amount, 2) . " for " . $withdrawal->user->email,
+        ]);
+
         return redirect()->back()->with('status', 'Withdrawal approved and investor notified!');
     }
 
@@ -56,6 +64,14 @@ class WithdrawalController extends Controller
 
         // Send Email
         \Illuminate\Support\Facades\Mail::to($withdrawal->user->email)->send(new \App\Mail\WithdrawalRejected($withdrawal));
+
+        // Non-Repudiation Logging (Admin Rejection)
+        \App\Models\AuditLog::create([
+            'user_id' => $withdrawal->user_id,
+            'admin_id' => auth()->id(),
+            'action' => 'Withdrawal Rejected',
+            'details' => "Rejected withdrawal of GH₵ " . number_format($withdrawal->amount, 2) . ". Reason: Policy / Insufficient Funds.",
+        ]);
 
         return redirect()->back()->with('status', 'Withdrawal rejected and investor notified!');
     }
