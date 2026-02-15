@@ -47,12 +47,15 @@ class InvestmentController extends Controller
             \Illuminate\Support\Facades\Log::error('Failed to send investment approval email: ' . $e->getMessage());
         }
 
+        // Calculate Amount Dynamically
+        $amount = $investment->package->price * $investment->units;
+
         // Non-Repudiation Logging (Guaranteed Execution)
         \App\Models\AuditLog::create([
             'user_id' => $investment->user_id,
             'admin_id' => auth()->id(),
             'action' => 'Investment Approved',
-            'details' => "Approved investment of GH₵ " . number_format($investment->amount, 2) . " for " . $investment->user->email,
+            'details' => "Approved investment of GH₵ " . number_format($amount, 2) . " for " . $investment->user->email,
         ]);
 
         return back()->with('success', 'Investment approved successfully.');
@@ -71,12 +74,15 @@ class InvestmentController extends Controller
         $investment->status = 'rejected';
         $investment->save();
 
+        // Calculate Amount Dynamically
+        $amount = $investment->package->price * $investment->units;
+
         // Non-Repudiation Logging (Guaranteed Execution)
         \App\Models\AuditLog::create([
             'user_id' => $investment->user_id,
             'admin_id' => auth()->id(),
             'action' => 'Investment Rejected',
-            'details' => "Rejected investment of GH₵ " . number_format($investment->amount, 2) . ".",
+            'details' => "Rejected investment of GH₵ " . number_format($amount, 2) . ".",
         ]);
 
         return back()->with('success', 'Investment rejected successfully.');
