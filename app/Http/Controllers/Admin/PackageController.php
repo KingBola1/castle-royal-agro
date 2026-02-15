@@ -24,6 +24,10 @@ class PackageController extends Controller
      */
     public function create()
     {
+        if (!auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) && !auth()->user()->hasDirectPermission('manage_packages')) {
+            abort(403, 'Unauthorized. You do not have the required permissions to manage packages.');
+        }
+
         return view('admin.packages.create');
     }
 
@@ -32,6 +36,10 @@ class PackageController extends Controller
      */
     public function store(Request $request)
     {
+        if (!auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) && !auth()->user()->hasDirectPermission('manage_packages')) {
+            abort(403, 'Unauthorized. You do not have the required permissions to manage packages.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'nullable|numeric|min:0',
@@ -86,6 +94,10 @@ class PackageController extends Controller
      */
     public function edit(Package $package)
     {
+        if (!auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) && !auth()->user()->hasDirectPermission('manage_packages')) {
+            abort(403, 'Unauthorized. You do not have the required permissions to manage packages.');
+        }
+
         return view('admin.packages.edit', compact('package'));
     }
 
@@ -94,6 +106,10 @@ class PackageController extends Controller
      */
     public function update(Request $request, Package $package)
     {
+        if (!auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) && !auth()->user()->hasDirectPermission('manage_packages')) {
+            abort(403, 'Unauthorized. You do not have the required permissions to manage packages.');
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'price' => 'nullable|numeric|min:0',
@@ -150,6 +166,10 @@ class PackageController extends Controller
      */
     public function destroy(Package $package)
     {
+        if (!auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) && !auth()->user()->hasDirectPermission('manage_packages')) {
+            abort(403, 'Unauthorized. You do not have the required permissions to manage packages.');
+        }
+
         $package->delete();
         return redirect()->route('admin.packages.index')->with('status', 'Package deleted successfully.');
     }

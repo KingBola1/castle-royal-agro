@@ -22,6 +22,10 @@ class WithdrawalController extends Controller
      */
     public function approve($id)
     {
+        if (!auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) && !auth()->user()->hasDirectPermission('manage_withdrawals')) {
+            abort(403, 'Unauthorized. You do not have the required permissions to approve or reject withdrawals.');
+        }
+
         $withdrawal = Withdrawal::findOrFail($id);
 
         if ($withdrawal->status !== 'pending') {
@@ -38,6 +42,10 @@ class WithdrawalController extends Controller
 
     public function reject($id)
     {
+        if (!auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) && !auth()->user()->hasDirectPermission('manage_withdrawals')) {
+            abort(403, 'Unauthorized. You do not have the required permissions to approve or reject withdrawals.');
+        }
+
         $withdrawal = Withdrawal::findOrFail($id);
 
         if ($withdrawal->status !== 'pending') {

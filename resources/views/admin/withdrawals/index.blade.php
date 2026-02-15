@@ -64,15 +64,19 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             @if($withdrawal->status === 'pending')
                                                 <div class="flex space-x-2">
-                                                    <form action="{{ route('admin.withdrawals.approve', $withdrawal->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve this withdrawal? This will notify the investor.');">
-                                                        @csrf
-                                                        <button type="submit" class="text-green-600 hover:text-green-900 font-bold">Approve</button>
-                                                    </form>
-                                                    <span class="text-gray-300">|</span>
-                                                    <form action="{{ route('admin.withdrawals.reject', $withdrawal->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to REJECT this withdrawal?');">
-                                                        @csrf
-                                                        <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Reject</button>
-                                                    </form>
+                                                    @if(auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) || auth()->user()->hasDirectPermission('manage_withdrawals'))
+                                                        <form action="{{ route('admin.withdrawals.approve', $withdrawal->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve this withdrawal? This will notify the investor.');">
+                                                            @csrf
+                                                            <button type="submit" class="text-green-600 hover:text-green-900 font-bold">Approve</button>
+                                                        </form>
+                                                        <span class="text-gray-300">|</span>
+                                                        <form action="{{ route('admin.withdrawals.reject', $withdrawal->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to REJECT this withdrawal?');">
+                                                            @csrf
+                                                            <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Reject</button>
+                                                        </form>
+                                                    @else
+                                                        <span class="text-gray-400 text-sm italic">Restricted</span>
+                                                    @endif
                                                 </div>
                                             @else
                                                 <span class="text-gray-400 italic">No actions</span>

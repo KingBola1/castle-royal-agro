@@ -9,9 +9,11 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
             <div class="flex justify-end mb-4">
-                <a href="{{ route('admin.packages.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                    + Create New Package
-                </a>
+                @if(auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) || auth()->user()->hasDirectPermission('manage_packages'))
+                    <a href="{{ route('admin.packages.create') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        + Create New Package
+                    </a>
+                @endif
             </div>
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -61,13 +63,17 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ route('admin.packages.edit', $package) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</a>
-                                            
-                                            <form action="{{ route('admin.packages.destroy', $package) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure? This will delete all investments associated with this package!');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
-                                            </form>
+                                            @if(auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) || auth()->user()->hasDirectPermission('manage_packages'))
+                                                <a href="{{ route('admin.packages.edit', $package) }}" class="text-indigo-600 hover:text-indigo-900 mr-4">Edit</a>
+                                                
+                                                <form action="{{ route('admin.packages.destroy', $package) }}" method="POST" class="inline-block" onsubmit="return confirm('Are you sure? This will delete all investments associated with this package!');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                                </form>
+                                            @else
+                                                <span class="text-gray-400 text-sm italic">View Only</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty
