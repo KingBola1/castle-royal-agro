@@ -17,15 +17,40 @@ use Illuminate\Validation\Rule;
 class AdminController extends Controller
 {
     // 1. Show the Dashboard
+    // 1. Show the Dashboard
     public function index()
     {
-        // Get all users, ordered by newest first
+        // Existing queries
         $users = User::orderBy('created_at', 'desc')->paginate(10);
-        
-        // Count Pending Investments for Dashboard Alert
         $pendingInvestmentsCount = Investment::where('status', 'pending')->count();
-        
-        return view('admin.dashboard', compact('users', 'pendingInvestmentsCount'));
+
+        // --- NEW: CTD COMMAND CENTER METRICS ---
+        // 1. Total Registered Users
+        $totalRegisteredUsers = User::count();
+
+        // 2. Total Active Investments (Financial sum)
+        $totalActiveInvestments = Investment::where('status', 'active')->sum('amount');
+
+        // 3. Pending Withdrawals (Safe check in case model is named differently)
+        $pendingWithdrawalsAmount = 0;
+        $pendingWithdrawalsCount = 0;
+        if (class_exists(\App\Models\Withdrawal::class)) {
+            $pendingWithdrawalsAmount = \App\Models\Withdrawal::where('status', 'pending')->sum('amount');
+            $pendingWithdrawalsCount = \App\Models\Withdrawal::where('status', 'pending')->count();
+        }
+
+        // 4. System Health / Staff Count
+        $staffCount = User::role(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin'])->count();
+
+        return view('admin.dashboard', compact(
+            'users', 
+            'pendingInvestmentsCount',
+            'totalRegisteredUsers',
+            'totalActiveInvestments',
+            'pendingWithdrawalsAmount',
+            'pendingWithdrawalsCount',
+            'staffCount'
+        ));
     }
 
     // 2. Show the "Manage User" Page
