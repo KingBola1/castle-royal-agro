@@ -230,16 +230,26 @@ Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admi
 });
 
 // --- 2. HIGH SECURITY ROUTES (System Owner & Super Admin ONLY) ---
-Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admin'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class);
-    Route::post('/users/{id}/suspend', [\App\Http\Controllers\Admin\UserController::class, 'suspend'])->name('users.suspend');
-    Route::post('/users/{id}/restore', [\App\Http\Controllers\Admin\UserController::class, 'restore'])->name('users.restore');
+Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admin', \App\Http\Middleware\RequireTwoFactor::class])->prefix('admin')->group(function () {
+    
+    // User Management (Legacy Routes for Navigation - NO admin. prefix in name)
+    Route::get('/users-management', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+    Route::get('/users-management/create', [\App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
+    Route::post('/users-management', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
+    Route::get('/users-management/{user}/edit', [\App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
+    Route::put('/users-management/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
 
-    // System Operations
-    Route::post('/system/migrate', [\App\Http\Controllers\Admin\SystemController::class, 'runMigrations'])->name('system.migrate');
+    // Admin Actions & System Operations (With admin. prefix in name)
+    Route::name('admin.')->group(function () {
+        Route::post('/users/{id}/suspend', [\App\Http\Controllers\Admin\UserController::class, 'suspend'])->name('users.suspend');
+        Route::post('/users/{id}/restore', [\App\Http\Controllers\Admin\UserController::class, 'restore'])->name('users.restore');
 
-    // Global Audit Trail
-    Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+        // System Operations
+        Route::post('/system/migrate', [\App\Http\Controllers\Admin\SystemController::class, 'runMigrations'])->name('system.migrate');
+
+        // Global Audit Trail
+        Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+    });
 });
 
 // --- ULTIMATE SECURITY ROUTE (System Owner ONLY) ---
