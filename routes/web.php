@@ -225,6 +225,12 @@ Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admi
     Route::post('/system/migrate', [\App\Http\Controllers\Admin\SystemController::class, 'runMigrations'])->name('system.migrate');
 });
 
+// --- ULTIMATE SECURITY ROUTE (System Owner ONLY) ---
+Route::middleware(['auth', 'verified', 'role:System Owner'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/system-settings', [\App\Http\Controllers\Admin\SystemSettingController::class, 'index'])->name('settings.index');
+    Route::post('/system-settings/transfer-ownership', [\App\Http\Controllers\Admin\SystemSettingController::class, 'transferOwnership'])->name('settings.transfer');
+});
+
 
 
 

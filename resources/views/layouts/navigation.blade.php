@@ -26,6 +26,12 @@
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Admin Panel') }}
                         </x-nav-link>
+
+                        @if(auth()->user()->hasRole('System Owner'))
+                            <x-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">
+                                <span class="text-red-600 font-bold">{{ __('System Settings') }}</span>
+                            </x-nav-link>
+                        @endif
                     @endif
 
                     <!-- Operational Admin Menu (Includes regular Admin) -->
@@ -108,6 +114,12 @@
                 <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                     {{ __('Admin Panel') }}
                 </x-responsive-nav-link>
+
+                @if(auth()->user()->hasRole('System Owner'))
+                    <x-responsive-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">
+                        <span class="text-red-600 font-bold">{{ __('System Settings') }}</span>
+                    </x-responsive-nav-link>
+                @endif
             @endif
 
             <!-- Operational Admin Menu (Mobile) -->
