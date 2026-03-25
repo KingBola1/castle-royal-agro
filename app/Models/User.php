@@ -23,7 +23,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function withdrawals()
     {
-        return $this->hasMany(Withdrawal::class);
+        return $this->hasMany(Withdrawal::class)->latest();
     }
 
     /**

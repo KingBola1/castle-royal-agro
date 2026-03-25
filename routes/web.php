@@ -42,11 +42,31 @@ Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.
 });
 
 Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admin|Admin|admin', \App\Http\Middleware\RequireTwoFactor::class])->prefix('admin')->name('admin.')->group(function () {
-Route::get('/2fa/setup', [\App\Http\Controllers\Admin\TwoFactorAuthController::class, 'setup'])->name('2fa.setup');
-Route::post('/2fa/setup', [\App\Http\Controllers\Admin\TwoFactorAuthController::class, 'confirmSetup'])->name('2fa.confirm');
-Route::get('/2fa/verify', [\App\Http\Controllers\Admin\TwoFactorAuthController::class, 'verify'])->name('2fa.verify');
-Route::post('/2fa/verify', [\App\Http\Controllers\Admin\TwoFactorAuthController::class, 'authenticate'])->name('2fa.authenticate');
+    Route::get('/2fa/setup', [\App\Http\Controllers\Admin\TwoFactorAuthController::class, 'enable'])->name('2fa.setup');
+    Route::get('/2fa/verify', [\App\Http\Controllers\Admin\TwoFactorAuthController::class, 'showVerify'])->name('2fa.verify');
+    Route::post('/2fa/verify', [\App\Http\Controllers\Admin\TwoFactorAuthController::class, 'verify'])->name('2fa.verify.store');
 
+    // RESTORED: Admin Dashboard Route
+    Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'index'])->name('dashboard');
+    Route::post('/investments/bulk-update', [\App\Http\Controllers\AdminController::class, 'bulkUpdateRoi'])->name('investments.bulk-update');
+
+    // Admin User Management & Actions
+    Route::get('/users/{id}', [\App\Http\Controllers\AdminController::class, 'show'])->name('users.show');
+    Route::put('/users/{id}', [\App\Http\Controllers\AdminController::class, 'update'])->name('users.update');
+    Route::post('/users/{id}/invest', [\App\Http\Controllers\AdminController::class, 'invest'])->name('users.invest');
+    Route::post('/users/{id}/reset-password', [\App\Http\Controllers\AdminController::class, 'resetPassword'])->name('users.reset-password');
+    Route::post('/users/{id}/magic-link', [\App\Http\Controllers\AdminController::class, 'generateMagicLink'])->name('users.magic-link');
+    Route::delete('/investments/{id}', [\App\Http\Controllers\AdminController::class, 'destroyInvestment'])->name('investments.destroy');
+
+    // Operational Admin Routes
+    Route::resource('packages', \App\Http\Controllers\Admin\PackageController::class);
+    Route::resource('withdrawals', \App\Http\Controllers\AdminWithdrawalController::class)->only(['index', 'update']);
+    Route::post('withdrawals/{withdrawal}/approve', [\App\Http\Controllers\AdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');
+    Route::post('withdrawals/{withdrawal}/reject', [\App\Http\Controllers\AdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
+    // Expand Investment routes
+    Route::get('investments', [\App\Http\Controllers\Admin\InvestmentController::class, 'index'])->name('investments.index');
+    Route::post('investments/{investment}/approve', [\App\Http\Controllers\Admin\InvestmentController::class, 'approve'])->name('investments.approve');
+    Route::post('investments/{investment}/reject', [\App\Http\Controllers\Admin\InvestmentController::class, 'reject'])->name('investments.reject');
 });
 
 Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admin', \App\Http\Middleware\RequireTwoFactor::class])->prefix('admin')->group(function () {
@@ -69,7 +89,7 @@ Route::get('/system-settings', [\App\Http\Controllers\Admin\SystemSettingControl
 Route::post('/system-settings/transfer-ownership', [\App\Http\Controllers\Admin\SystemSettingController::class, 'transferOwnership'])->name('settings.transfer');
 });
 
-require DIR.'/auth.php';
+require __DIR__.'/auth.php';
 
 Route::get('/magic-login/{user}', function (Request $request, $id) {
 if (! $request->hasValidSignature()) abort(403, 'This link is invalid or has expired.');

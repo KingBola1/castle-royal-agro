@@ -98,7 +98,7 @@ class UserController extends Controller
         }
 
         $user = User::findOrFail($id);
-        $user->status = 'banned';
+        $user->status = 'frozen';
         $user->save();
 
         return back()->with('status', "User {$user->name} has been suspended.");

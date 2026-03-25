@@ -20,8 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // FORCE HTTPS GLOBALLY (Fixes Signature Mismatch)
-        URL::forceScheme('https');
+        // FORCE HTTPS GLOBALLY (Fixes Signature Mismatch) -- only in production/staging
+        if (! $this->app->environment('local')) {
+            URL::forceScheme('https');
+        }
 
         // Register Brevo Mailer Driver (Bulletproof)
         \Illuminate\Support\Facades\Mail::extend('brevo', function () {

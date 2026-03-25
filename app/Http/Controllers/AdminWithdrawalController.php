@@ -12,10 +12,23 @@ use Illuminate\Http\Request;
 
 class AdminWithdrawalController extends Controller
 {
-    public function index()
-    {
-        $withdrawals = Withdrawal::with('user')->latest()->get();
+    public function index() {
+        $withdrawals = \App\Models\Withdrawal::with('user')->latest()->paginate(10);
         return view('admin.withdrawals.index', compact('withdrawals'));
+    }
+
+    public function approve(Request $request, $id)
+    {
+        // Inject the approved status and forward to the existing update logic
+        $request->merge(['status' => 'approved']);
+        return $this->update($request, $id);
+    }
+
+    public function reject(Request $request, $id)
+    {
+        // Inject the rejected status and forward to the existing update logic
+        $request->merge(['status' => 'rejected']);
+        return $this->update($request, $id);
     }
 
     public function update(Request $request, $id)
@@ -56,6 +69,14 @@ class AdminWithdrawalController extends Controller
                 'htmlContent' => "<h2>Hello {$withdrawal->user->name},</h2><p>Your withdrawal of <strong>GHS " . number_format($withdrawal->amount, 2) . "</strong> has been approved and processed.</p><p>Thank you for investing with Castle Royal Agro.</p>"
             ]);
 
+            // Log Action in Super Admin Audit Log
+            \App\Models\AuditLog::create([
+                'user_id' => $withdrawal->user_id,
+                'admin_id' => auth()->id(),
+                'action' => 'Withdrawal Approved',
+                'details' => "Approved withdrawal of GH₵ " . number_format($withdrawal->amount, 2) . " for " . ($withdrawal->user->email ?? 'investor') . ".",
+            ]);
+
             return redirect()->back()->with('success', 'Withdrawal Approved & Investor Notified.');
         } 
         elseif ($request->status === 'rejected') {
@@ -67,6 +88,14 @@ class AdminWithdrawalController extends Controller
                 'to' => [['email' => $withdrawal->user->email, 'name' => $withdrawal->user->name]],
                 'subject' => '⚠️ Withdrawal Request Declined',
                 'htmlContent' => "<h2>Hello {$withdrawal->user->name},</h2><p>Your withdrawal request for <strong>GHS " . number_format($withdrawal->amount, 2) . "</strong> has been declined.</p><p>Please check your payment details in your dashboard or contact support for more information.</p>"
+            ]);
+
+            // Log Action in Super Admin Audit Log
+            \App\Models\AuditLog::create([
+                'user_id' => $withdrawal->user_id,
+                'admin_id' => auth()->id(),
+                'action' => 'Withdrawal Rejected',
+                'details' => "Rejected withdrawal of GH₵ " . number_format($withdrawal->amount, 2) . " for " . ($withdrawal->user->email ?? 'investor') . ".",
             ]);
 
             return redirect()->back()->with('success', 'Withdrawal Denied & Investor Notified.');

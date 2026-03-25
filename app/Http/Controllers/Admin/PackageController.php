@@ -61,12 +61,12 @@ class PackageController extends Controller
         $data['slug'] = $slug;
 
         // 1. Handle File Upload (Native SDK)
-        if ($request->hasFile('image')) {
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
             // Fetch URL safely bypassing Laravel's config cache entirely
             $cloudUrl = $_SERVER['CLOUDINARY_URL'] ?? $_ENV['CLOUDINARY_URL'] ?? env('CLOUDINARY_URL');
 
-            if (empty($cloudUrl)) {
-                return back()->withErrors(['image' => 'CRITICAL: Cloudinary URL is missing from server.']);
+            if (empty($cloudUrl) || str_contains($cloudUrl, '<your_api_key>')) {
+                return back()->withErrors(['image' => 'Cloudinary is not configured. Please set a valid CLOUDINARY_URL in your .env file.']);
             }
 
             // Initialize Native PHP SDK directly
@@ -141,12 +141,12 @@ class PackageController extends Controller
         $package->fill($request->except(['image', 'image_url']));
 
         // 1. Handle File Upload (Native SDK)
-        if ($request->hasFile('image')) {
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
             // Fetch URL safely bypassing Laravel's config cache entirely
             $cloudUrl = $_SERVER['CLOUDINARY_URL'] ?? $_ENV['CLOUDINARY_URL'] ?? env('CLOUDINARY_URL');
 
-            if (empty($cloudUrl)) {
-                return back()->withErrors(['image' => 'CRITICAL: Cloudinary URL is missing from server.']);
+            if (empty($cloudUrl) || str_contains($cloudUrl, '<your_api_key>')) {
+                return back()->withErrors(['image' => 'Cloudinary is not configured. Please set a valid CLOUDINARY_URL in your .env file.']);
             }
 
             // Initialize Native PHP SDK directly
