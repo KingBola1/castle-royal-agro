@@ -56,9 +56,12 @@
                 
                 {{-- LOGO --}}
                 <div class="flex items-center">
-                    <a href="{{ url('/') }}" class="flex flex-col cursor-pointer z-[101]">
-                        <span class="text-2xl font-black text-moringa-leaf tracking-tighter">CastleROYAL</span>
-                        <span class="text-xs font-bold text-ghana-gold tracking-widest uppercase">Agro Ghana Ltd</span>
+                    <a href="{{ url('/') }}" class="flex items-center space-x-3 cursor-pointer z-[101]">
+                        <img src="{{ asset('logo.jpg') }}" alt="Castle Royal Logo" class="h-10 w-auto rounded-md object-contain">
+                        <div class="flex flex-col">
+                            <span class="text-2xl font-black text-moringa-leaf tracking-tighter leading-none mb-1">CastleROYAL</span>
+                            <span class="text-xs font-bold text-ghana-gold tracking-widest uppercase leading-none">Agro Ghana Ltd</span>
+                        </div>
                     </a>
                 </div>
                 
