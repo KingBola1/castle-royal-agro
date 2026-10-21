@@ -27,15 +27,19 @@
         <div class="absolute inset-0 bg-white/80 z-0"></div>
 
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10">
-        {{-- SECURE BACK-OFFICE BUTTON (Hidden from regular investors) --}}
-            @hasanyrole('System Owner|Super Admin|super_admin|Admin|admin')
-            <div class="mb-6 flex justify-end">
-                <a href="{{ route('admin.dashboard') }}" class="inline-flex items-center px-6 py-3 bg-red-700 border border-transparent rounded-md font-bold text-white uppercase tracking-widest hover:bg-red-800 shadow-lg hover:scale-105 transition-transform">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    Enter Secure Back-Office
+
+       {{-- SECURE BACK-OFFICE BUTTON --}}
+            @if(Auth::user()->role === 'super_admin' || Auth::user()->role === 'admin' || Auth::user()->role === 'System Owner')
+            <div class="mb-6 bg-red-50 border-l-4 border-red-600 p-4 rounded shadow-sm flex justify-between items-center">
+                <div>
+                    <h3 class="text-red-800 font-bold text-lg">System Management</h3>
+                    <p class="text-sm text-red-600">Access the secure back-office to manage users and investments.</p>
+                </div>
+                <a href="{{ route('admin.dashboard') }}" class="bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-6 rounded-lg shadow-md uppercase tracking-wider transition transform hover:scale-105">
+                    Enter Back-Office
                 </a>
             </div>
-            @endhasanyrole
+            @endif
             
             {{-- Section 1: Welcome & Status --}}
             {{-- Border Top is YELLOW (Gold) --}}

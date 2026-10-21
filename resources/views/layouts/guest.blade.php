@@ -19,7 +19,7 @@
     <body class="font-sans text-gray-900 antialiased relative min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
         
         {{-- The Golden Green Background Pattern --}}
-        <div class="absolute inset-0 z-0 bg-repeat bg-[length:400px_400px] opacity-20" style="background-image: url('{{ asset('images/backgrounds/moringa_pattern.png') }}');"></div>
+        <div class="absolute inset-0 z-0 bg-repeat bg-[length:400px_400px] opacity-60" style="background-image: url('{{ asset('images/backgrounds/moringa_pattern.png') }}');"></div>
         <div class="absolute inset-0 z-0 bg-gradient-to-b from-transparent to-green-900/10"></div>
 
         <div class="relative z-10">

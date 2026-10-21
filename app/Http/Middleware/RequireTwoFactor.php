@@ -12,24 +12,25 @@ class RequireTwoFactor
     {
         $user = auth()->user();
 
-        // The Rule: Only stop people who are Management
-        if ($user && $user->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin'])) {
+        // Check the database column directly (which loads instantly)
+        if ($user && in_array($user->role, ['super_admin', 'admin', 'System Owner'])) {
             
-            // If they haven't set up the Google App yet, force them to the setup page
-            if (!$user->google2fa_secret) {
-                if (!$request->routeIs('admin.2fa.setup') && !$request->routeIs('admin.2fa.verify.store')) {
-                    return redirect()->route('admin.2fa.setup');
-                }
+            // Allow them to visit the 2FA screens without getting stuck in a loop
+            if ($request->routeIs('admin.2fa.*')) {
+                return $next($request);
+            }
+
+            // 1. If they haven't set up the Google App yet, force setup
+            if (empty($user->google2fa_secret)) {
+                return redirect()->route('admin.2fa.setup');
             } 
-            // If they have it set up, but haven't typed the 6 digits yet, force them to the verify page
-            elseif (!$request->session()->has('2fa_verified')) {
-                if (!$request->routeIs('admin.2fa.verify') && !$request->routeIs('admin.2fa.verify.store')) {
-                    return redirect()->route('admin.2fa.verify');
-                }
+            
+            // 2. If they have it set up, but haven't typed the 6 digits yet, force verify
+            if (!$request->session()->has('2fa_verified')) {
+                return redirect()->route('admin.2fa.verify');
             }
         }
 
-        // Let everyone else (regular investors) walk through without 2FA
         return $next($request);
     }
 }
