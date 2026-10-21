@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -24,7 +25,9 @@ class UserController extends Controller
      */
     public function create()
     {
-        $roles = Role::all();
+        // THE FIX: Only pull the 4 official roles from the database. Ignore ghosts/typos.
+        $roles = Role::whereIn('name', ['System Owner', 'super_admin', 'admin', 'investor'])->get();
+        
         return view('admin.users.create', compact('roles'));
     }
 
@@ -43,7 +46,7 @@ class UserController extends Controller
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'password' => Hash::make($request->password),
         ]);
 
         $user->assignRole($request->role);
@@ -57,7 +60,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = Role::all();
+        // THE FIX: Only pull the 4 official roles for the edit screen too.
+        $roles = Role::whereIn('name', ['System Owner', 'super_admin', 'admin', 'investor'])->get();
         $permissions = Permission::all();
         
         return view('admin.users.edit', compact('user', 'roles', 'permissions'));
@@ -77,8 +81,6 @@ class UserController extends Controller
         if ($request->has('roles')) {
             $user->syncRoles($request->roles);
         } else {
-            // If no roles selected, ensure we don't accidentally strip Super Admin if not allowed
-            // Ideally explicit deselect
             $user->syncRoles([]);
         }
 
@@ -91,6 +93,7 @@ class UserController extends Controller
 
         return redirect()->route('users.index')->with('status', 'User roles and permissions updated successfully.');
     }
+
     public function suspend($id)
     {
         if (!auth()->user()->hasRole('System Owner')) {
