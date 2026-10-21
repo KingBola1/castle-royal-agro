@@ -1,0 +1,2134 @@
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\Dockerfile ===
+# Use PHP 8.4
+FROM php:8.4-apache
+
+# Install dependencies (PostgreSQL support included)
+RUN apt-get update && apt-get install -y \
+    libzip-dev \
+    unzip \
+    git \
+    libpq-dev \
+    && docker-php-ext-install zip pdo_pgsql bcmath
+
+# Enable Apache mod_rewrite
+RUN a2enmod rewrite
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy application files
+COPY . .
+
+# Configure Apache
+RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Install PHP dependencies
+RUN composer update --no-dev --optimize-autoloader
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# Expose port
+EXPOSE 80
+
+# START COMMAND (Clears Config Cache -> Starts Server)
+CMD bash -c "php artisan migrate --force && php artisan config:clear && apache2-foreground"
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\config\database.php ===
+<?php
+
+use Illuminate\Support\Str;
+
+return [
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Database Connection Name
+    |--------------------------------------------------------------------------
+    |
+    | Here you may specify which of the database connections below you wish
+    | to use as your default connection for database operations. This is
+    | the connection which will be utilized unless another connection
+    | is explicitly specified when you execute a query / statement.
+    |
+    */
+
+    'default' => env('DB_CONNECTION', 'sqlite'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Database Connections
+    |--------------------------------------------------------------------------
+    |
+    | Below are all of the database connections defined for your application.
+    | An example configuration is provided for each database system which
+    | is supported by Laravel. You're free to add / remove connections.
+    |
+    */
+
+    'connections' => [
+
+        'sqlite' => [
+            'driver' => 'sqlite',
+            'url' => env('DB_URL'),
+            'database' => env('DB_DATABASE', database_path('database.sqlite')),
+            'prefix' => '',
+            'foreign_key_constraints' => env('DB_FOREIGN_KEYS', true),
+            'busy_timeout' => null,
+            'journal_mode' => null,
+            'synchronous' => null,
+            'transaction_mode' => 'DEFERRED',
+        ],
+
+        'mysql' => [
+            'driver' => 'mysql',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'laravel'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+        'mariadb' => [
+            'driver' => 'mariadb',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '3306'),
+            'database' => env('DB_DATABASE', 'laravel'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'unix_socket' => env('DB_SOCKET', ''),
+            'charset' => env('DB_CHARSET', 'utf8mb4'),
+            'collation' => env('DB_COLLATION', 'utf8mb4_unicode_ci'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'strict' => true,
+            'engine' => null,
+            'options' => extension_loaded('pdo_mysql') ? array_filter([
+                (PHP_VERSION_ID >= 80500 ? \Pdo\Mysql::ATTR_SSL_CA : \PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
+            ]) : [],
+        ],
+
+        'pgsql' => [
+            'driver' => 'pgsql',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', '127.0.0.1'),
+            'port' => env('DB_PORT', '5432'),
+            'database' => env('DB_DATABASE', 'laravel'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            'search_path' => 'public',
+            'sslmode' => 'require',
+        ],
+
+        'sqlsrv' => [
+            'driver' => 'sqlsrv',
+            'url' => env('DB_URL'),
+            'host' => env('DB_HOST', 'localhost'),
+            'port' => env('DB_PORT', '1433'),
+            'database' => env('DB_DATABASE', 'laravel'),
+            'username' => env('DB_USERNAME', 'root'),
+            'password' => env('DB_PASSWORD', ''),
+            'charset' => env('DB_CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
+            // 'encrypt' => env('DB_ENCRYPT', 'yes'),
+            // 'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE', 'false'),
+        ],
+
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Migration Repository Table
+    |--------------------------------------------------------------------------
+    |
+    | This table keeps track of all the migrations that have already run for
+    | your application. Using this information, we can determine which of
+    | the migrations on disk haven't actually been run on the database.
+    |
+    */
+
+    'migrations' => [
+        'table' => 'migrations',
+        'update_date_on_publish' => true,
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Redis Databases
+    |--------------------------------------------------------------------------
+    |
+    | Redis is an open source, fast, and advanced key-value store that also
+    | provides a richer body of commands than a typical key-value system
+    | such as Memcached. You may define your connection settings here.
+    |
+    */
+
+    'redis' => [
+
+        'client' => env('REDIS_CLIENT', 'phpredis'),
+
+        'options' => [
+            'cluster' => env('REDIS_CLUSTER', 'redis'),
+            'prefix' => env('REDIS_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')).'-database-'),
+            'persistent' => env('REDIS_PERSISTENT', false),
+        ],
+
+        'default' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'username' => env('REDIS_USERNAME'),
+            'password' => env('REDIS_PASSWORD'),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_DB', '0'),
+            'max_retries' => env('REDIS_MAX_RETRIES', 3),
+            'backoff_algorithm' => env('REDIS_BACKOFF_ALGORITHM', 'decorrelated_jitter'),
+            'backoff_base' => env('REDIS_BACKOFF_BASE', 100),
+            'backoff_cap' => env('REDIS_BACKOFF_CAP', 1000),
+        ],
+
+        'cache' => [
+            'url' => env('REDIS_URL'),
+            'host' => env('REDIS_HOST', '127.0.0.1'),
+            'username' => env('REDIS_USERNAME'),
+            'password' => env('REDIS_PASSWORD'),
+            'port' => env('REDIS_PORT', '6379'),
+            'database' => env('REDIS_CACHE_DB', '1'),
+            'max_retries' => env('REDIS_MAX_RETRIES', 3),
+            'backoff_algorithm' => env('REDIS_BACKOFF_ALGORITHM', 'decorrelated_jitter'),
+            'backoff_base' => env('REDIS_BACKOFF_BASE', 100),
+            'backoff_cap' => env('REDIS_BACKOFF_CAP', 1000),
+        ],
+
+    ],
+
+];
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Models\AuditLog.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+
+class AuditLog extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'admin_id',
+        'action',
+        'details',
+    ];
+
+    public function admin()
+    {
+        return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Models\Deposit.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use App\Services\BrevoMailService;
+
+class Deposit extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'amount',
+        'status', // pending, approved, rejected
+        'proof_of_payment',
+        'admin_note',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (Deposit $deposit) {
+            // Send Alert to Admin
+            BrevoMailService::send(
+                env('MAIL_FROM_ADDRESS'),
+                'Castle Royal Admin',
+                '💰 New Deposit Request',
+                "
+                <div style='font-family: Arial; padding: 20px; border: 1px solid #eee;'>
+                    <h2>New Deposit Request</h2>
+                    <p>A user has submitted a new deposit request.</p>
+                    <ul>
+                        <li><strong>User:</strong> {$deposit->user->name}</li>
+                        <li><strong>Amount:</strong> GHS " . number_format($deposit->amount, 2) . "</li>
+                        <li><strong>Time:</strong> " . now()->format('Y-m-d H:i:s') . "</li>
+                    </ul>
+                    <a href='" . url('/admin/deposits') . "'>View in Admin Panel</a>
+                </div>"
+            );
+        });
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Models\Investment.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Investment extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'package_id',
+        'amount_invested',
+        'units',
+        'expected_roi',
+        'status',
+        'payment_reference',
+    ];
+
+    protected $casts = [
+        'amount_invested' => 'decimal:2',
+        'expected_roi' => 'decimal:2',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function package()
+    {
+        return $this->belongsTo(Package::class);
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Models\InvestmentPackage.php ===
+<?php
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class InvestmentPackage extends Model
+{
+use HasFactory;
+
+protected $fillable = [
+    'name',
+    'slug',
+    'description',
+    'price',
+    'roi_percentage',
+    'duration_months',
+    'status',
+    'image'
+];
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Models\Package.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Package extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'slug',
+        'description',
+        'price',
+        'roi_percentage',
+        'duration_months',
+        'status',
+        'image',
+    ];
+
+    protected $casts = [
+        'price' => 'decimal:2',
+        'roi_percentage' => 'decimal:2',
+    ];
+
+    public function investments()
+    {
+        return $this->hasMany(Investment::class);
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Models\User.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable implements MustVerifyEmail
+{
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasRoles, HasFactory, Notifiable;
+
+    /**
+     * Get the investments for the user.
+     */
+    public function investments()
+    {
+        return $this->hasMany(Investment::class);
+    }
+
+    public function withdrawals()
+    {
+        return $this->hasMany(Withdrawal::class)->latest();
+    }
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'role',
+        'status',
+        'phone',
+        'ghana_card_id',
+        'address',
+        'next_of_kin_name',
+        'next_of_kin_phone',
+        'total_invested',
+        'active_acres',
+        'projected_roi',
+        'momo_details',
+        'bank_details',
+        'google2fa_secret', // Added for 2FA
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'google2fa_secret', // Added for 2FA
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+        ];
+    }
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
+    {
+        static::created(function (User $user) {
+            
+            // 1. Send Welcome Email to User
+            \App\Services\BrevoMailService::send(
+                $user->email,
+                $user->name,
+                '🌱 Welcome to Castle Royal Agro!',
+                "
+                <div style='font-family: Arial; padding: 20px; border: 1px solid #eee;'>
+                    <h2>Welcome, {$user->name}!</h2>
+                    <p>Thank you for joining <strong>Castle Royal Agro</strong>. We are excited to have you on board.</p>
+                    <p>You can now log in to your dashboard to view investment packages and track your portfolio.</p>
+                    <br>
+                    <a href='" . route('login') . "' style='background-color: #2d3748; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Login to Dashboard</a>
+                </div>"
+            );
+
+            // 2. Send New Sign-up Alert to Admin
+            \App\Services\BrevoMailService::send(
+                env('MAIL_FROM_ADDRESS'), // Send to Admin
+                'Castle Royal Admin',
+                '🔔 New User Registration',
+                "
+                <div style='font-family: Arial; padding: 20px; border: 1px solid #eee;'>
+                    <h2>New User Alert</h2>
+                    <p>A new user has just registered on the platform.</p>
+                    <ul>
+                        <li><strong>Name:</strong> {$user->name}</li>
+                        <li><strong>Email:</strong> {$user->email}</li>
+                        <li><strong>Time:</strong> " . now()->format('Y-m-d H:i:s') . "</li>
+                    </ul>
+                    <a href='" . route('admin.dashboard') . "'>View in Admin Panel</a>
+                </div>"
+            );
+        });
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Models\Withdrawal.php ===
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Withdrawal extends Model
+{
+    use HasFactory;
+
+    protected $fillable = [
+        'user_id',
+        'amount',
+        'payment_details',
+        'status',
+        'admin_note',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\0001_01_01_000000_create_users_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->rememberToken();
+            $table->timestamps();
+        });
+
+        Schema::create('password_reset_tokens', function (Blueprint $table) {
+            $table->string('email')->primary();
+            $table->string('token');
+            $table->timestamp('created_at')->nullable();
+        });
+
+        Schema::create('sessions', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->foreignId('user_id')->nullable()->index();
+            $table->string('ip_address', 45)->nullable();
+            $table->text('user_agent')->nullable();
+            $table->longText('payload');
+            $table->integer('last_activity')->index();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('users');
+        Schema::dropIfExists('password_reset_tokens');
+        Schema::dropIfExists('sessions');
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\0001_01_01_000001_create_cache_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('cache', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->mediumText('value');
+            $table->integer('expiration')->index();
+        });
+
+        Schema::create('cache_locks', function (Blueprint $table) {
+            $table->string('key')->primary();
+            $table->string('owner');
+            $table->integer('expiration')->index();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('cache');
+        Schema::dropIfExists('cache_locks');
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\0001_01_01_000002_create_jobs_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('jobs', function (Blueprint $table) {
+            $table->id();
+            $table->string('queue')->index();
+            $table->longText('payload');
+            $table->unsignedTinyInteger('attempts');
+            $table->unsignedInteger('reserved_at')->nullable();
+            $table->unsignedInteger('available_at');
+            $table->unsignedInteger('created_at');
+        });
+
+        Schema::create('job_batches', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->string('name');
+            $table->integer('total_jobs');
+            $table->integer('pending_jobs');
+            $table->integer('failed_jobs');
+            $table->longText('failed_job_ids');
+            $table->mediumText('options')->nullable();
+            $table->integer('cancelled_at')->nullable();
+            $table->integer('created_at');
+            $table->integer('finished_at')->nullable();
+        });
+
+        Schema::create('failed_jobs', function (Blueprint $table) {
+            $table->id();
+            $table->string('uuid')->unique();
+            $table->text('connection');
+            $table->text('queue');
+            $table->longText('payload');
+            $table->longText('exception');
+            $table->timestamp('failed_at')->useCurrent();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('jobs');
+        Schema::dropIfExists('job_batches');
+        Schema::dropIfExists('failed_jobs');
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_05_142812_add_profile_fields_to_users_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up()
+{
+    Schema::table('users', function (Blueprint $table) {
+        $table->string('phone')->nullable();
+        $table->string('ghana_card_id')->nullable();
+        $table->string('address')->nullable();
+        $table->string('next_of_kin_name')->nullable();
+        $table->string('next_of_kin_phone')->nullable();
+    });
+}
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            //
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_05_180000_add_investment_fields_to_users_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->decimal('total_invested', 15, 2)->default(0)->after('password');
+            $table->decimal('active_acres', 10, 2)->default(0)->after('total_invested');
+            $table->decimal('projected_roi', 10, 2)->default(0)->after('active_acres');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn(['total_invested', 'active_acres', 'projected_roi']);
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_05_222303_add_role_and_status_to_users_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->enum('role', ['investor', 'admin', 'super_admin'])->default('investor');
+            $table->enum('status', ['active', 'frozen', 'blocked'])->default('active');
+            $table->integer('blocked_by')->nullable();
+        });
+
+        // Auto-promote User 1 to Super Admin
+        DB::table('users')->where('id', 1)->update(['role' => 'super_admin']);
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            //
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_07_120000_create_investments_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('investments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->decimal('amount', 10, 2);
+            $table->decimal('acres', 8, 2);
+            $table->string('status')->default('active');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('investments');
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_07_133048_add_roi_data_to_investments_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            $table->decimal('roi_percentage', 5, 2)->nullable();
+            $table->decimal('projected_profit', 15, 2)->nullable();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            $table->dropColumn(['roi_percentage', 'projected_profit']);
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_07_173752_create_investment_packages_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('investment_packages', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->decimal('amount', 15, 2);
+            $table->decimal('roi_percentage', 5, 2);
+            $table->decimal('acres', 8, 2);
+            $table->integer('duration_months')->default(12);
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('investment_packages');
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_07_173803_create_audit_logs_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('audit_logs', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Who was changed
+            $table->foreignId('admin_id')->constrained('users')->onDelete('cascade'); // Who did it
+            $table->string('action');
+            $table->text('details')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('audit_logs');
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_07_173806_add_soft_deletes_to_investments_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            $table->softDeletes();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            $table->dropSoftDeletes();
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_07_191410_update_investments_and_packages_tables.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            $table->string('package_name')->nullable()->after('user_id');
+        });
+
+        Schema::table('investment_packages', function (Blueprint $table) {
+            $table->decimal('acres', 8, 2)->nullable()->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            $table->dropColumn('package_name');
+        });
+
+        Schema::table('investment_packages', function (Blueprint $table) {
+            $table->decimal('acres', 8, 2)->nullable(false)->change();
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_07_200412_increase_roi_percentage_size.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            $table->decimal('roi_percentage', 10, 2)->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            $table->decimal('roi_percentage', 5, 2)->change();
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_07_203830_create_withdrawals_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('withdrawals', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->decimal('amount', 10, 2);
+            $table->text('payment_details');
+            $table->enum('status', ['pending', 'approved', 'rejected'])->default('pending');
+            $table->text('admin_note')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('withdrawals');
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_08_044428_add_payment_details_to_users_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->text('payment_details')->nullable();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('payment_details');
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_08_081814_add_bank_details_to_users.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->renameColumn('payment_details', 'momo_details');
+            $table->text('bank_details')->nullable()->after('payment_details');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->renameColumn('momo_details', 'payment_details');
+            $table->dropColumn('bank_details');
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_10_000001_create_permission_tables.php ===
+<?php
+
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        $tableNames = [
+            'roles' => 'roles',
+            'permissions' => 'permissions',
+            'model_has_permissions' => 'model_has_permissions',
+            'model_has_roles' => 'model_has_roles',
+            'role_has_permissions' => 'role_has_permissions',
+        ];
+
+        Schema::create($tableNames['permissions'], function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name');
+            $table->string('guard_name');
+            $table->timestamps();
+            $table->unique(['name', 'guard_name']);
+        });
+
+        Schema::create($tableNames['roles'], function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name');
+            $table->string('guard_name');
+            $table->timestamps();
+            $table->unique(['name', 'guard_name']);
+        });
+
+        Schema::create($tableNames['model_has_permissions'], function (Blueprint $table) {
+            $table->unsignedBigInteger('permission_id'); // Hardcoded
+            $table->string('model_type');
+            $table->unsignedBigInteger('model_id');      // Hardcoded
+            $table->index(['model_id', 'model_type'], 'model_has_permissions_model_id_model_type_index');
+
+            $table->foreign('permission_id')
+                ->references('id')
+                ->on('permissions')
+                ->onDelete('cascade');
+
+            $table->primary(['permission_id', 'model_id', 'model_type'],
+                    'model_has_permissions_permission_model_type_primary');
+        });
+
+        Schema::create($tableNames['model_has_roles'], function (Blueprint $table) {
+            $table->unsignedBigInteger('role_id'); // Hardcoded
+            $table->string('model_type');
+            $table->unsignedBigInteger('model_id'); // Hardcoded
+            $table->index(['model_id', 'model_type'], 'model_has_roles_model_id_model_type_index');
+
+            $table->foreign('role_id')
+                ->references('id')
+                ->on('roles')
+                ->onDelete('cascade');
+
+            $table->primary(['role_id', 'model_id', 'model_type'],
+                    'model_has_roles_role_model_type_primary');
+        });
+
+        Schema::create($tableNames['role_has_permissions'], function (Blueprint $table) {
+            $table->unsignedBigInteger('permission_id');
+            $table->unsignedBigInteger('role_id');
+
+            $table->foreign('permission_id')
+                ->references('id')
+                ->on('permissions')
+                ->onDelete('cascade');
+
+            $table->foreign('role_id')
+                ->references('id')
+                ->on('roles')
+                ->onDelete('cascade');
+
+            $table->primary(['permission_id', 'role_id'], 'role_has_permissions_permission_id_role_id_primary');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::dropIfExists('role_has_permissions');
+        Schema::dropIfExists('model_has_roles');
+        Schema::dropIfExists('model_has_permissions');
+        Schema::dropIfExists('roles');
+        Schema::dropIfExists('permissions');
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_11_000001_create_packages_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('packages', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('slug')->unique();
+            $table->text('description');
+            $table->decimal('price', 10, 2);
+            $table->decimal('roi_percentage', 5, 2);
+            $table->integer('duration_months');
+            $table->string('status')->default('draft'); // 'draft', 'open', 'closed', 'sold_out'
+            $table->string('image')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('packages');
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_11_000002_create_investments_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::dropIfExists('investments');
+
+        Schema::create('investments', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('package_id')->constrained('packages')->cascadeOnDelete();
+            $table->decimal('amount_invested', 15, 2);
+            $table->integer('units');
+            $table->decimal('expected_roi', 15, 2);
+            $table->string('status')->default('active'); // 'pending', 'active', 'completed'
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('investments');
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_12_000000_fix_role_names.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\Models\Role;
+use App\Models\User;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        $roleName = 'Super Admin';
+        $email = 'kwamerahman83@gmail.com';
+
+        // 1. Ensure 'Super Admin' role exists
+        $role = Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
+
+        // 2. Find the user
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            // 3. Gracefully try to remove old roles if they exist
+            // effectively 'cleaning' the user's roles before assigning the correct one
+            $user->syncRoles([$role]); 
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_13_000001_fix_packages_price_column.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('packages', function (Blueprint $table) {
+            // Check for missing columns and add them
+            if (!Schema::hasColumn('packages', 'price')) {
+                $table->decimal('price', 10, 2)->after('description');
+            }
+            if (!Schema::hasColumn('packages', 'roi_percentage')) {
+                $table->decimal('roi_percentage', 5, 2)->after('price');
+            }
+            if (!Schema::hasColumn('packages', 'duration_months')) {
+                $table->integer('duration_months')->after('roi_percentage');
+            }
+            // Check for legacy column and rename/drop if necessary
+            if (Schema::hasColumn('packages', 'price_per_unit')) {
+                $table->dropColumn('price_per_unit');
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('packages', function (Blueprint $table) {
+            $table->dropColumn(['price', 'roi_percentage', 'duration_months']);
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_13_000002_add_image_column.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('packages', function (Blueprint $table) {
+            // Check if 'image' exists. If not, add it.
+            if (!Schema::hasColumn('packages', 'image')) {
+                // We make it nullable so the site doesn't crash if an image is missing
+                $table->string('image')->nullable()->after('status');
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('packages', function (Blueprint $table) {
+            if (Schema::hasColumn('packages', 'image')) {
+                $table->dropColumn('image');
+            }
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_13_000003_fix_packages_schema_sync.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('packages', function (Blueprint $table) {
+            // 1. Fix Image: Add it if missing
+            if (!Schema::hasColumn('packages', 'image')) {
+                $table->string('image')->nullable()->after('status');
+            }
+
+            // 2. Fix Price: Add it if missing
+            if (!Schema::hasColumn('packages', 'price')) {
+                $table->decimal('price', 15, 2)->default(0.00)->after('description');
+            }
+
+            // 3. Fix Description: Make it nullable to prevent "Not Null Violation" crashes
+            // We use 'change()' to modify the existing column.
+            $table->text('description')->nullable()->change();
+        });
+    }
+
+    public function down(): void
+    {
+        // No down method needed for safety (we don't want to revert these fixes)
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_13_000004_make_package_fields_nullable.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('packages', function (Blueprint $table) {
+            $table->string('slug')->nullable()->change();
+            $table->text('description')->nullable()->change();
+            $table->decimal('price', 15, 2)->nullable()->change();
+            $table->decimal('roi_percentage', 5, 2)->nullable()->change();
+            $table->integer('duration_months')->nullable()->change();
+            $table->string('status')->default('draft')->change();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        // Reverting nullable changes can be tricky if data exists, so we leave it.
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_13_000005_add_payment_reference_to_investments.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            if (!Schema::hasColumn('investments', 'payment_reference')) {
+                $table->string('payment_reference')->nullable()->after('status');
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            if (Schema::hasColumn('investments', 'payment_reference')) {
+                $table->dropColumn('payment_reference');
+            }
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_13_184639_add_units_to_investments_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        if (!Schema::hasColumn('investments', 'units')) {
+            Schema::table('investments', function (Blueprint $table) {
+                // Add units column, default to 1 just in case, placed after package_id
+                $table->integer('units')->default(1)->after('package_id');
+            });
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            $table->dropColumn('units');
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_13_193027_add_expected_roi_to_investments_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        if (!Schema::hasColumn('investments', 'expected_roi')) {
+            Schema::table('investments', function (Blueprint $table) {
+                // Add expected_roi column to store calculated financial returns
+                $table->decimal('expected_roi', 15, 2)->nullable()->after('amount_invested');
+            });
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('investments', function (Blueprint $table) {
+            $table->dropColumn('expected_roi');
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_13_202347_drop_units_purchased_from_investments_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        \Illuminate\Support\Facades\Schema::table('investments', function (\Illuminate\Database\Schema\Blueprint $table) {
+            if (\Illuminate\Support\Facades\Schema::hasColumn('investments', 'units_purchased')) {
+                $table->dropColumn('units_purchased');
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        \Illuminate\Support\Facades\Schema::table('investments', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->integer('units_purchased')->nullable();
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_13_212441_drop_legacy_expected_returns_from_investments.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        \Illuminate\Support\Facades\Schema::table('investments', function (\Illuminate\Database\Schema\Blueprint $table) {
+            if (\Illuminate\Support\Facades\Schema::hasColumn('investments', 'expected_returns')) {
+                $table->dropColumn('expected_returns');
+            }
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        \Illuminate\Support\Facades\Schema::table('investments', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->decimal('expected_returns', 15, 2)->nullable();
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_14_033844_make_dates_nullable_in_investments.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        // Using raw SQL for Postgres to drop NOT NULL constraint only if the columns exist
+        if (DB::getDriverName() === 'pgsql') {
+            if (Schema::hasColumn('investments', 'start_date')) {
+                DB::statement('ALTER TABLE investments ALTER COLUMN start_date DROP NOT NULL');
+            }
+
+            if (Schema::hasColumn('investments', 'end_date')) {
+                DB::statement('ALTER TABLE investments ALTER COLUMN end_date DROP NOT NULL');
+            }
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        // Re-add NOT NULL constraint only if the columns exist
+        if (DB::getDriverName() === 'pgsql') {
+            if (Schema::hasColumn('investments', 'start_date')) {
+                DB::statement('ALTER TABLE investments ALTER COLUMN start_date SET NOT NULL');
+            }
+
+            if (Schema::hasColumn('investments', 'end_date')) {
+                DB::statement('ALTER TABLE investments ALTER COLUMN end_date SET NOT NULL');
+            }
+        }
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_14_144339_cleanup_duplicate_spatie_roles.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\Models\Role;
+use App\Models\User;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        // 1. Ensure Canonical Role Exists
+        $canonicalRole = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
+
+        // 2. Find and Fix Duplicate 'Super_admin'
+        $duplicateRole = Role::where('name', 'Super_admin')->first();
+
+        if ($duplicateRole) {
+            // Re-assign users from duplicate to canonical
+            $users = User::role('Super_admin')->get();
+            foreach ($users as $user) {
+                // Remove old, assign new
+                $user->removeRole($duplicateRole);
+                $user->assignRole($canonicalRole);
+            }
+            
+            // Delete the duplicate role
+            $duplicateRole->delete();
+        }
+
+        // 3. Cleanup other potential typos if they exist (optional safety)
+        $typos = ['super_admin', 'Superadmin', 'super admin']; // Add any others if known
+        foreach ($typos as $typo) {
+            $role = Role::where('name', $typo)->where('id', '!=', $canonicalRole->id)->first();
+            if ($role) {
+                // Re-assign users
+                $users = User::role($typo)->get();
+                foreach ($users as $user) {
+                    $user->removeRole($role);
+                    $user->assignRole($canonicalRole);
+                }
+                $role->delete();
+            }
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        // No reverse action needed for cleanup
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_14_194826_establish_system_owner_role.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+use App\Models\User;
+use Spatie\Permission\Models\Role;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        // 1. Create the God Mode Role
+        $systemOwner = Role::firstOrCreate(['name' => 'System Owner', 'guard_name' => 'web']);
+
+        // 2. Find the CTD Master Account
+        $ctdEmail = 'kwamerahman83@gmail.com';
+        $user = User::where('email', $ctdEmail)->first();
+
+        if ($user) {
+            // 3. Assign the Role
+            $user->assignRole($systemOwner);
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        //
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_15_090647_seed_granular_spatie_permissions.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        // Define the granular operational keys
+        $permissions = [
+            'manage_packages',
+            'manage_investments',
+            'manage_withdrawals'
+        ];
+
+        foreach ($permissions as $permission) {
+            \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $permission]);
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        //
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_15_153306_add_view_audit_logs_permission.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up()
+    {
+        // 1. Create the Permission
+        $permission = \Spatie\Permission\Models\Permission::create(['name' => 'view_audit_logs']);
+
+        // 2. Assign to System Owner (Super Admins get it manually later)
+        $role = \Spatie\Permission\Models\Role::where('name', 'System Owner')->first();
+        if ($role) {
+            $role->givePermissionTo($permission);
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        //
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_15_170749_make_admin_id_nullable_in_audit_logs.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('audit_logs', function (Blueprint $table) {
+            //
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('audit_logs', function (Blueprint $table) {
+            //
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_15_194518_add_google2fa_secret_to_users_table.php ===
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->text('google2fa_secret')->nullable()->after('password');
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('google2fa_secret');
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_21_053424_add_new_fields_to_investment_packages_table.php ===
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('investment_packages', function (Blueprint $table) {
+            // Add new columns only if they don't exist
+            if (!Schema::hasColumn('investment_packages', 'description')) {
+                $table->text('description')->nullable();
+            }
+            if (!Schema::hasColumn('investment_packages', 'price')) {
+                $table->decimal('price', 15, 2)->nullable();
+            }
+            if (!Schema::hasColumn('investment_packages', 'status')) {
+                $table->string('status')->default('draft');
+            }
+            if (!Schema::hasColumn('investment_packages', 'image')) {
+                $table->string('image')->nullable();
+            }
+            if (!Schema::hasColumn('investment_packages', 'slug')) {
+                $table->string('slug')->nullable();
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('investment_packages', function (Blueprint $table) {
+            $table->dropColumn(['description', 'price', 'status', 'image', 'slug']);
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_21_054816_make_old_package_columns_nullable.php ===
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('investment_packages', function (Blueprint $table) {
+            // Make old columns nullable so they don't block new inserts
+            if (Schema::hasColumn('investment_packages', 'amount')) {
+                $table->decimal('amount', 15, 2)->nullable()->change();
+            }
+            if (Schema::hasColumn('investment_packages', 'acres')) {
+                $table->integer('acres')->nullable()->change();
+            }
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('investment_packages', function (Blueprint $table) {
+            // Reverse the change if needed
+            if (Schema::hasColumn('investment_packages', 'amount')) {
+                $table->decimal('amount', 15, 2)->nullable(false)->change();
+            }
+            if (Schema::hasColumn('investment_packages', 'acres')) {
+                $table->integer('acres')->nullable(false)->change();
+            }
+        });
+    }
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\migrations\2026_02_23_150800_make_user_id_nullable_in_audit_logs_table.php ===
+<?php
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+public function up(): void
+{
+Schema::table('audit_logs', function (Blueprint $table) {
+// Make user_id nullable to allow global system logs
+$table->unsignedBigInteger('user_id')->nullable()->change();
+});
+}
+
+public function down(): void
+{
+    Schema::table('audit_logs', function (Blueprint $table) {
+        $table->unsignedBigInteger('user_id')->nullable(false)->change();
+    });
+}
+};
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\seeders\DatabaseSeeder.php ===
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class DatabaseSeeder extends Seeder
+{
+    use WithoutModelEvents;
+
+    /**
+     * Seed the application's database.
+     */
+    public function run(): void
+    {
+        // User::factory(10)->create();
+
+
+
+        $this->call(SuperAdminSeeder::class);
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\seeders\InvestmentPackageSeeder.php ===
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+
+class InvestmentPackageSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        \App\Models\InvestmentPackage::create([
+            'name' => 'Starter Pack',
+            'amount' => 5000,
+            'roi_percentage' => 15,
+            'acres' => 0.5,
+            'duration_months' => 12,
+        ]);
+
+        \App\Models\InvestmentPackage::create([
+            'name' => 'Gold Tier',
+            'amount' => 20000,
+            'roi_percentage' => 25,
+            'acres' => 2.0,
+            'duration_months' => 12,
+        ]);
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\seeders\RolesAndPermissionsSeeder.php ===
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
+use App\Models\User;
+
+class RolesAndPermissionsSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Reset cached roles and permissions
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // create permissions
+        Permission::create(['name' => 'manage users']);
+        Permission::create(['name' => 'view financials']);
+        Permission::create(['name' => 'edit projects']);
+        Permission::create(['name' => 'view own portfolio']);
+
+        // create roles and assign created permissions
+
+        // Investor
+        $role = Role::create(['name' => 'investor']);
+        $role->givePermissionTo('view own portfolio');
+
+        // Admin (Customizable)
+        $role = Role::create(['name' => 'admin']);
+        $role->givePermissionTo(['manage users', 'edit projects']);
+
+        // Super Admin
+        $role = Role::create(['name' => 'super_admin']);
+        // Super Admin gets all permissions via Gate::before rule; see AuthServiceProvider/AppServiceProvider
+
+        // Assign Super Admin role to specific user
+        $user = User::where('email', 'kwamerahman83@gmail.com')->first();
+        if ($user) {
+            $user->assignRole('super_admin');
+        }
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\database\seeders\SuperAdminSeeder.php ===
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+
+class SuperAdminSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        User::updateOrCreate(
+            ['email' => 'kwamerahman83@gmail.com'],
+            [
+                'name' => 'Kwame Rahman',
+                'role' => 'super_admin',
+                'status' => 'active',
+                'password' => Hash::make('CastleRoyal2026!'),
+                'email_verified_at' => Carbon::now(),
+            ]
+        );
+        
+        $this->command->info("Super Admin seeded successfully: kwamerahman83@gmail.com");
+    }
+}
+

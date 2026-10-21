@@ -11,33 +11,29 @@ class RolesAndPermissionsSeeder extends Seeder
 {
     public function run(): void
     {
-        // Reset cached roles and permissions
+        // 1. Force clear the Spatie RAM cache so it doesn't get confused
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // create permissions
-        Permission::create(['name' => 'manage users']);
-        Permission::create(['name' => 'view financials']);
-        Permission::create(['name' => 'edit projects']);
-        Permission::create(['name' => 'view own portfolio']);
+        // 2. Explicitly create permissions using firstOrCreate and the 'web' guard
+        Permission::firstOrCreate(['name' => 'manage users', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'view financials', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'edit projects', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'view own portfolio', 'guard_name' => 'web']);
 
-        // create roles and assign created permissions
+        // 3. Create roles and safely assign permissions
+        $investorRole = Role::firstOrCreate(['name' => 'investor', 'guard_name' => 'web']);
+        $investorRole->givePermissionTo('view own portfolio');
 
-        // Investor
-        $role = Role::create(['name' => 'investor']);
-        $role->givePermissionTo('view own portfolio');
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $adminRole->givePermissionTo(['manage users', 'edit projects']);
 
-        // Admin (Customizable)
-        $role = Role::create(['name' => 'admin']);
-        $role->givePermissionTo(['manage users', 'edit projects']);
+        // 4. Ensure Canonical Super Admin exists (matching your migrations)
+        $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
 
-        // Super Admin
-        $role = Role::create(['name' => 'super_admin']);
-        // Super Admin gets all permissions via Gate::before rule; see AuthServiceProvider/AppServiceProvider
-
-        // Assign Super Admin role to specific user
+        // 5. Safely assign to user if they exist at this stage
         $user = User::where('email', 'kwamerahman83@gmail.com')->first();
         if ($user) {
-            $user->assignRole('super_admin');
+            $user->assignRole($superAdminRole);
         }
     }
 }

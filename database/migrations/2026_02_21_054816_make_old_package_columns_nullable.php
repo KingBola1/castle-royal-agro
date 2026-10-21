@@ -13,7 +13,8 @@ return new class extends Migration
                 $table->decimal('amount', 15, 2)->nullable()->change();
             }
             if (Schema::hasColumn('investment_packages', 'acres')) {
-                $table->integer('acres')->nullable()->change();
+                // FIXED: Changed integer() back to decimal() to allow 0.5 values
+                $table->decimal('acres', 8, 2)->nullable()->change();
             }
         });
     }
@@ -26,7 +27,7 @@ return new class extends Migration
                 $table->decimal('amount', 15, 2)->nullable(false)->change();
             }
             if (Schema::hasColumn('investment_packages', 'acres')) {
-                $table->integer('acres')->nullable(false)->change();
+                $table->decimal('acres', 8, 2)->nullable(false)->change();
             }
         });
     }
