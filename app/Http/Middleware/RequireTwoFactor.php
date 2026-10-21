@@ -8,32 +8,28 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RequireTwoFactor
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
         $user = auth()->user();
 
-        if ($user) {
-            // 1. If user hasn't set up 2FA yet, force them to setup
+        // The Rule: Only stop people who are Management
+        if ($user && $user->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin'])) {
+            
+            // If they haven't set up the Google App yet, force them to the setup page
             if (!$user->google2fa_secret) {
-                // Prevent infinite redirect loop if already on setup page or enable action
-                if (!$request->routeIs('admin.2fa.setup') && !$request->routeIs('admin.2fa.enable') && !$request->routeIs('admin.2fa.verify.store')) {
+                if (!$request->routeIs('admin.2fa.setup') && !$request->routeIs('admin.2fa.verify.store')) {
                     return redirect()->route('admin.2fa.setup');
                 }
             } 
-            // 2. If user has 2FA set up, check if session is verified
+            // If they have it set up, but haven't typed the 6 digits yet, force them to the verify page
             elseif (!$request->session()->has('2fa_verified')) {
-                // Prevent infinite redirect loop if already on verify page or verify action
                 if (!$request->routeIs('admin.2fa.verify') && !$request->routeIs('admin.2fa.verify.store')) {
                     return redirect()->route('admin.2fa.verify');
                 }
             }
         }
 
+        // Let everyone else (regular investors) walk through without 2FA
         return $next($request);
     }
 }

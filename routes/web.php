@@ -23,7 +23,7 @@ Route::get('/products', [PageController::class, 'products'])->name('products');
 Route::get('/about', function () { return view('about'); })->name('about');
 Route::redirect('/investors', '/login');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', \App\Http\Middleware\RequireTwoFactor::class])->group(function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
 Route::get('/marketplace/{package:slug}', [MarketplaceController::class, 'show'])->name('marketplace.show');

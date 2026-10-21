@@ -1,0 +1,1434 @@
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\routes\web.php ===
+<?php
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\InvestmentPackageController;
+use App\Http\Controllers\WithdrawalController;
+use App\Http\Controllers\AdminWithdrawalController;
+use App\Http\Controllers\Investor\MarketplaceController;
+use App\Http\Controllers\Admin\UserController;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+
+Route::get('/', function () { return view('welcome'); });
+Route::get('/initiative', [PageController::class, 'initiative'])->name('initiative');
+Route::get('/products', [PageController::class, 'products'])->name('products');
+Route::get('/about', function () { return view('about'); })->name('about');
+Route::redirect('/investors', '/login');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace.index');
+Route::get('/marketplace/{package:slug}', [MarketplaceController::class, 'show'])->name('marketplace.show');
+Route::post('/marketplace/{package}/buy', [MarketplaceController::class, 'store'])->name('marketplace.buy');
+});
+
+Route::middleware(['auth', 'ensure.active'])->group(function () {
+Route::resource('withdrawals', WithdrawalController::class)->only(['create', 'store']);
+});
+
+Route::middleware('auth')->group(function () {
+Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+Route::patch('/profile/payment-details', [ProfileController::class, 'updatePaymentDetails'])->name('profile.payment-details');
+Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admin|Admin|admin', \App\Http\Middleware\RequireTwoFactor::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/2fa/setup', [\App\Http\Controllers\Admin\TwoFactorAuthController::class, 'enable'])->name('2fa.setup');
+    Route::get('/2fa/verify', [\App\Http\Controllers\Admin\TwoFactorAuthController::class, 'showVerify'])->name('2fa.verify');
+    Route::post('/2fa/verify', [\App\Http\Controllers\Admin\TwoFactorAuthController::class, 'verify'])->name('2fa.verify.store');
+
+    // RESTORED: Admin Dashboard Route
+    Route::get('/dashboard', [\App\Http\Controllers\AdminController::class, 'index'])->name('dashboard');
+    Route::post('/investments/bulk-update', [\App\Http\Controllers\AdminController::class, 'bulkUpdateRoi'])->name('investments.bulk-update');
+
+    // Admin User Management & Actions
+    Route::get('/users/{id}', [\App\Http\Controllers\AdminController::class, 'show'])->name('users.show');
+    Route::put('/users/{id}', [\App\Http\Controllers\AdminController::class, 'update'])->name('users.update');
+    Route::post('/users/{id}/invest', [\App\Http\Controllers\AdminController::class, 'invest'])->name('users.invest');
+    Route::post('/users/{id}/reset-password', [\App\Http\Controllers\AdminController::class, 'resetPassword'])->name('users.reset-password');
+    Route::post('/users/{id}/magic-link', [\App\Http\Controllers\AdminController::class, 'generateMagicLink'])->name('users.magic-link');
+    Route::delete('/investments/{id}', [\App\Http\Controllers\AdminController::class, 'destroyInvestment'])->name('investments.destroy');
+
+    // Operational Admin Routes
+    Route::resource('packages', \App\Http\Controllers\Admin\PackageController::class);
+    Route::resource('withdrawals', \App\Http\Controllers\AdminWithdrawalController::class)->only(['index', 'update']);
+    Route::post('withdrawals/{withdrawal}/approve', [\App\Http\Controllers\AdminWithdrawalController::class, 'approve'])->name('withdrawals.approve');
+    Route::post('withdrawals/{withdrawal}/reject', [\App\Http\Controllers\AdminWithdrawalController::class, 'reject'])->name('withdrawals.reject');
+    // Expand Investment routes
+    Route::get('investments', [\App\Http\Controllers\Admin\InvestmentController::class, 'index'])->name('investments.index');
+    Route::post('investments/{investment}/approve', [\App\Http\Controllers\Admin\InvestmentController::class, 'approve'])->name('investments.approve');
+    Route::post('investments/{investment}/reject', [\App\Http\Controllers\Admin\InvestmentController::class, 'reject'])->name('investments.reject');
+});
+
+Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admin', \App\Http\Middleware\RequireTwoFactor::class])->prefix('admin')->group(function () {
+Route::get('/users-management', [\App\Http\Controllers\Admin\UserController::class, 'index'])->name('users.index');
+Route::get('/users-management/create', [\App\Http\Controllers\Admin\UserController::class, 'create'])->name('users.create');
+Route::post('/users-management', [\App\Http\Controllers\Admin\UserController::class, 'store'])->name('users.store');
+Route::get('/users-management/{user}/edit', [\App\Http\Controllers\Admin\UserController::class, 'edit'])->name('users.edit');
+Route::put('/users-management/{user}', [\App\Http\Controllers\Admin\UserController::class, 'update'])->name('users.update');
+});
+
+Route::middleware(['auth', 'verified', 'role:System Owner|Super Admin|super_admin', \App\Http\Middleware\RequireTwoFactor::class])->prefix('admin')->name('admin.')->group(function () {
+Route::post('/users/{id}/suspend', [\App\Http\Controllers\Admin\UserController::class, 'suspend'])->name('users.suspend');
+Route::post('/users/{id}/restore', [\App\Http\Controllers\Admin\UserController::class, 'restore'])->name('users.restore');
+Route::post('/system/migrate', [\App\Http\Controllers\Admin\SystemController::class, 'runMigrations'])->name('system.migrate');
+Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+});
+
+Route::middleware(['auth', 'verified', 'role:System Owner', \App\Http\Middleware\RequireTwoFactor::class])->prefix('admin')->name('admin.')->group(function () {
+Route::get('/system-settings', [\App\Http\Controllers\Admin\SystemSettingController::class, 'index'])->name('settings.index');
+Route::post('/system-settings/transfer-ownership', [\App\Http\Controllers\Admin\SystemSettingController::class, 'transferOwnership'])->name('settings.transfer');
+});
+
+require __DIR__.'/auth.php';
+
+Route::get('/magic-login/{user}', function (Request $request, $id) {
+if (! $request->hasValidSignature()) abort(403, 'This link is invalid or has expired.');
+$user = User::findOrFail($id);
+Auth::login($user);
+return redirect('/dashboard')->with('status', 'Magic Login Successful!');
+})->name('magic.login');
+
+Route::get('/test-email', function () {
+try {
+Mail::raw('WORKING!', function ($msg) { $msg->to(['kwamerahman83@gmail.com'])->subject('Test Email'); });
+return 'SUCCESS!';
+} catch (\Exception $e) { return 'FAILURE: ' . $e->getMessage(); }
+});
+
+Route::get('/debug-smtp', function () {
+$config = Config::get('mail.mailers.smtp');
+return "Host: " . $config['host'] . " | Port: " . $config['port'] . " | User: " . $config['username'];
+});
+
+Route::get('/clear-cache', function() {
+Artisan::call('config:clear'); Artisan::call('cache:clear');
+return "Cache Cleared!";
+});
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\bootstrap\app.php ===
+<?php
+
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+    )
+    ->withMiddleware(function (Middleware $middleware): void {
+        // Trust Render Load Balancer (Fixes HTTPS detection)
+        $middleware->trustProxies(at: '*');
+
+        $middleware->web(append: [
+            \App\Http\Middleware\EnsureAccountIsActive::class,
+        ]);
+
+        $middleware->alias([
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'admin' => \App\Http\Middleware\EnsureUserIsAdmin::class,
+            'ensure.active' => \App\Http\Middleware\EnsureAccountIsActive::class,
+        ]);
+    })
+    ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, $request) {
+            if ($e->getStatusCode() === 419) {
+                return redirect()->route('login')->with('status', 'For your security, your session expired due to inactivity. Please log in again.');
+            }
+        });
+    })->create();
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Controllers\Auth\AuthenticatedSessionController.php ===
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
+
+class AuthenticatedSessionController extends Controller
+{
+    /**
+     * Display the login view.
+     */
+    public function create(): View
+    {
+        return view('auth.login');
+    }
+
+    /**
+     * Handle an incoming authentication request.
+     */
+    public function store(LoginRequest $request): RedirectResponse
+    {
+        $request->authenticate();
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('dashboard', absolute: false));
+    }
+
+    /**
+     * Destroy an authenticated session.
+     */
+    public function destroy(Request $request): RedirectResponse
+    {
+        Auth::guard('web')->logout();
+
+        $request->session()->invalidate();
+
+        $request->session()->regenerateToken();
+
+        return redirect('/');
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Controllers\Auth\ConfirmablePasswordController.php ===
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
+
+class ConfirmablePasswordController extends Controller
+{
+    /**
+     * Show the confirm password view.
+     */
+    public function show(): View
+    {
+        return view('auth.confirm-password');
+    }
+
+    /**
+     * Confirm the user's password.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        if (! Auth::guard('web')->validate([
+            'email' => $request->user()->email,
+            'password' => $request->password,
+        ])) {
+            throw ValidationException::withMessages([
+                'password' => __('auth.password'),
+            ]);
+        }
+
+        $request->session()->put('auth.password_confirmed_at', time());
+
+        return redirect()->intended(route('dashboard', absolute: false));
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Controllers\Auth\EmailVerificationNotificationController.php ===
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+
+class EmailVerificationNotificationController extends Controller
+{
+    /**
+     * Send a new email verification notification.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('status', 'verification-link-sent');
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Controllers\Auth\EmailVerificationPromptController.php ===
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class EmailVerificationPromptController extends Controller
+{
+    /**
+     * Display the email verification prompt.
+     */
+    public function __invoke(Request $request): RedirectResponse|View
+    {
+        return $request->user()->hasVerifiedEmail()
+                    ? redirect()->intended(route('dashboard', absolute: false))
+                    : view('auth.verify-email');
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Controllers\Auth\NewPasswordController.php ===
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules;
+use Illuminate\View\View;
+
+class NewPasswordController extends Controller
+{
+    /**
+     * Display the password reset view.
+     */
+    public function create(Request $request): View
+    {
+        return view('auth.reset-password', ['request' => $request]);
+    }
+
+    /**
+     * Handle an incoming new password request.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'token' => ['required'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        // Here we will attempt to reset the user's password. If it is successful we
+        // will update the password on an actual user model and persist it to the
+        // database. Otherwise we will parse the error and return the response.
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (User $user) use ($request) {
+                $user->forceFill([
+                    'password' => Hash::make($request->password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        // If the password was successfully reset, we will redirect the user back to
+        // the application's home authenticated view. If there is an error we can
+        // redirect them back to where they came from with their error message.
+        return $status == Password::PASSWORD_RESET
+                    ? redirect()->route('login')->with('status', __($status))
+                    : back()->withInput($request->only('email'))
+                        ->withErrors(['email' => __($status)]);
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Controllers\Auth\PasswordController.php ===
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
+
+class PasswordController extends Controller
+{
+    /**
+     * Update the user's password.
+     */
+    public function update(Request $request): RedirectResponse
+    {
+        $validated = $request->validateWithBag('updatePassword', [
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', Password::defaults(), 'confirmed'],
+        ]);
+
+        $request->user()->update([
+            'password' => Hash::make($validated['password']),
+        ]);
+
+        return back()->with('status', 'password-updated');
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Controllers\Auth\PasswordResetLinkController.php ===
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Password;
+use Illuminate\View\View;
+
+class PasswordResetLinkController extends Controller
+{
+    /**
+     * Display the password reset link request view.
+     */
+    public function create(): View
+    {
+        return view('auth.forgot-password');
+    }
+
+    /**
+     * Handle an incoming password reset link request.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'email' => ['required', 'email'],
+        ]);
+
+        // We will send the password reset link to this user. Once we have attempted
+        // to send the link, we will examine the response then see the message we
+        // need to show to the user. Finally, we'll send out a proper response.
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status == Password::RESET_LINK_SENT
+                    ? back()->with('status', __($status))
+                    : back()->withInput($request->only('email'))
+                        ->withErrors(['email' => __($status)]);
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Controllers\Auth\RegisteredUserController.php ===
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
+use Illuminate\View\View;
+
+class RegisteredUserController extends Controller
+{
+    /**
+     * Display the registration view.
+     */
+    public function create(): View
+    {
+        return view('auth.register');
+    }
+
+    /**
+     * Handle an incoming registration request.
+     *
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        $user->assignRole('investor');
+
+        try {
+            event(new Registered($user));
+        } catch (\Exception $e) {
+            // Log the error but continue logging in the user
+            \Illuminate\Support\Facades\Log::error('Registration Event Failed: ' . $e->getMessage());
+        }
+
+        Auth::login($user);
+
+        return redirect(route('dashboard', absolute: false));
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Controllers\Auth\VerifyEmailController.php ===
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Verified;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Illuminate\Http\RedirectResponse;
+
+class VerifyEmailController extends Controller
+{
+    /**
+     * Mark the authenticated user's email address as verified.
+     */
+    public function __invoke(EmailVerificationRequest $request): RedirectResponse
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        }
+
+        if ($request->user()->markEmailAsVerified()) {
+            event(new Verified($request->user()));
+        }
+
+        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Middleware\EnsureAccountIsActive.php ===
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
+
+class EnsureAccountIsActive
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (Auth::check()) {
+            $user = Auth::user();
+            
+            // STRICTLY PERMISSIVE: Only deny if explicitly 'banned'.
+            // Allow null, allow 'active', allow 'frozen' (unless strictly banned).
+            if ($user->status === 'banned') {
+                Auth::logout();
+
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()->route('login')->withErrors([
+                    'email' => 'Your account is currently banned. Please contact support.',
+                ]);
+            }
+        }
+
+        return $next($request);
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Middleware\EnsureUserIsAdmin.php ===
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
+
+class EnsureUserIsAdmin
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        if (Auth::check() && (Auth::user()->role === 'admin' || Auth::user()->role === 'super_admin')) {
+            return $next($request);
+        }
+
+        return redirect()->route('dashboard')->with('error', 'Unauthorized access.');
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\app\Http\Middleware\RequireTwoFactor.php ===
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class RequireTwoFactor
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     */
+    public function handle(Request $request, Closure $next): Response
+    {
+        $user = auth()->user();
+
+        if ($user) {
+            // 1. If user hasn't set up 2FA yet, force them to setup
+            if (!$user->google2fa_secret) {
+                // Prevent infinite redirect loop if already on setup page or enable action
+                if (!$request->routeIs('admin.2fa.setup') && !$request->routeIs('admin.2fa.enable') && !$request->routeIs('admin.2fa.verify.store')) {
+                    return redirect()->route('admin.2fa.setup');
+                }
+            } 
+            // 2. If user has 2FA set up, check if session is verified
+            elseif (!$request->session()->has('2fa_verified')) {
+                // Prevent infinite redirect loop if already on verify page or verify action
+                if (!$request->routeIs('admin.2fa.verify') && !$request->routeIs('admin.2fa.verify.store')) {
+                    return redirect()->route('admin.2fa.verify');
+                }
+            }
+        }
+
+        return $next($request);
+    }
+}
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\resources\views\dashboard.blade.php ===
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-amber-900 leading-tight">
+            @if(auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin']))
+                Staff Dashboard
+            @else
+                Investor Portfolio
+            @endif
+        </h2>
+    </x-slot>
+
+    {{-- Main Background: Golden Lemon Green Moringa Pattern --}}
+    <div class="py-12 min-h-screen relative bg-cover bg-center bg-fixed" 
+         style="background-image: url('{{ asset('images/backgrounds/moringa_pattern.png') }}');">
+        
+        {{-- Success Message --}}
+        @if (session('status'))
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 mb-4 relative z-10">
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                    <strong class="font-bold">Success!</strong>
+                    <span class="block sm:inline">{{ session('status') }}</span>
+                </div>
+            </div>
+        @endif
+
+        {{-- Overlay to ensure text readability --}}
+        <div class="absolute inset-0 bg-white/80 z-0"></div>
+
+    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 relative z-10">
+            
+            {{-- Section 1: Welcome & Status --}}
+            {{-- Border Top is YELLOW (Gold) --}}
+            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg mb-8 border-t-8 border-yellow-500">
+                <div class="p-8 bg-white border-b border-gray-200">
+                    <div class="flex flex-col md:flex-row justify-between items-center">
+                        <div>
+                            {{-- Text is GREEN (Moringa) --}}
+                            <h3 class="text-3xl font-bold text-green-700">
+                                Welcome, {{ $user->name }}!
+                                @if(Auth::user()->role === 'super_admin' || Auth::user()->role === 'admin')
+                                    <span class="ml-2 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full uppercase tracking-wide">
+                                        {{ str_replace('_', ' ', Auth::user()->role) }}
+                                    </span>
+                                @endif
+                            </h3>
+                            <p class="text-gray-500 mt-2 text-lg">
+                                Investor ID: <span class="font-mono text-amber-800 font-bold">CRA-{{ $user->id }}-{{ $user->created_at->format('Y') }}</span>
+                            </p>
+                        </div>
+                        <div class="mt-4 md:mt-0 text-center md:text-right">
+                            <span class="inline-flex items-center px-5 py-2 rounded-full text-sm font-bold bg-green-100 text-green-800 border border-green-200 shadow-sm">
+                                <span class="w-3 h-3 bg-green-500 rounded-full mr-2 animate-pulse"></span>
+                                Account Active
+                            </span>
+                            <p class="text-xs text-gray-400 mt-2">Member since {{ $user->created_at->format('M d, Y') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Section 2: Financial Stats Grid --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                
+                {{-- Card 1: Total Investment --}}
+                <div class="bg-white overflow-hidden shadow-lg rounded-xl p-8 border border-gray-100 hover:shadow-2xl transition duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Invested</h4>
+                        <div class="p-3 bg-yellow-50 rounded-full">
+                            <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+                    <p class="text-4xl font-extrabold text-amber-900">GH₵ {{ number_format($totalInvested, 2) }}</p>
+                    <p class="text-sm text-gray-400 mt-2">Acres Secured: {{ $activeAcres }}</p>
+                </div>
+
+                {{-- Card 2: Total Withdrawn --}}
+                <div class="bg-white overflow-hidden shadow-lg rounded-xl p-8 border border-gray-100 hover:shadow-2xl transition duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Withdrawn</h4>
+                        <div class="p-3 bg-red-50 rounded-full">
+                            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                        </div>
+                    </div>
+                    <p class="text-4xl font-extrabold text-amber-900">GH₵ {{ number_format($totalWithdrawn ?? 0, 2) }}</p>
+                    <p class="text-sm text-gray-400 mt-2">Successful Payouts</p>
+                </div>
+
+                {{-- Card 3: Total Amount Left --}}
+                <div class="bg-white overflow-hidden shadow-lg rounded-xl p-8 border border-gray-100 hover:shadow-2xl transition duration-300">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Amount Left</h4>
+                        <div class="p-3 bg-blue-50 rounded-full">
+                            {{-- Icon: Suitcase/Wallet --}}
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                        </div>
+                    </div>
+                    <p class="text-4xl font-extrabold text-amber-900">GH₵ {{ number_format($totalAmountLeft ?? 0, 2) }}</p>
+                    <p class="text-sm text-gray-400 mt-2">Available Balance</p>
+                </div>
+
+                {{-- Card 2: Active Acres --}}
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-green-500">
+                    <div class="text-gray-500 text-sm font-medium uppercase tracking-wide">Land Portfolio</div>
+                    <div class="mt-2 flex items-baseline">
+                        <span class="text-3xl font-extrabold text-gray-900">
+                            {{ number_format(Auth::user()->active_acres, 1) }}
+                        </span>
+                        <span class="ml-2 text-sm font-medium text-gray-500">Acres</span>
+                    </div>
+                </div>
+
+                {{-- Card 3: Projected ROI --}}
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6 border-l-4 border-indigo-500 relative">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-gray-500 text-sm font-medium uppercase tracking-wide">Projected Cash Return</div>
+                            <div class="mt-2 flex items-baseline">
+                                <span class="text-3xl font-extrabold text-gray-900">
+                                    GH₵ {{ number_format($projectedRoi, 2) }}
+                                </span>
+                                <span class="ml-2 text-sm font-medium text-gray-500">Available</span>
+                            </div>
+                        </div>
+                        <a href="{{ route('withdrawals.create') }}" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition">
+                            Request Payout
+                        </a>
+                    </div>
+                </div>
+
+                {{-- Card 3: Action Required --}}
+                <div class="bg-amber-900 overflow-hidden shadow-lg rounded-xl p-8 text-white relative group cursor-pointer">
+                    <div class="relative z-10">
+                        <p class="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-1">Action Required</p>
+                        <h4 class="text-2xl font-bold mb-4">Complete Profile</h4>
+                        <p class="text-sm text-gray-200 mb-6">Add your Phone, Next of Kin, and Ghana Card to unlock investments.</p>
+                        <a href="{{ route('profile.edit') }}" class="inline-block w-full bg-yellow-500 text-amber-900 text-center font-bold py-3 px-4 rounded shadow hover:bg-white hover:text-green-700 transition duration-300">
+                            Go to Settings
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Section 3: Wallet Settings --}}
+            <div class="mt-8 bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 bg-white border-b border-gray-200">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">
+                        💼 Wallet Settings
+                    </h3>
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <form method="post" action="{{ route('profile.payment-details') }}">
+                            @csrf
+                            @method('patch')
+
+                            {{-- MoMo Details --}}
+                            <div class="mb-4">
+                                <label for="momo_details" class="block font-medium text-sm text-gray-700">
+                                    Mobile Money Details
+                                </label>
+                                <textarea id="momo_details" name="momo_details" rows="2" 
+                                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" 
+                                    placeholder="e.g. MTN MoMo - 0244 000 000 - John Doe">{{ Auth::user()->momo_details }}</textarea>
+                            </div>
+
+                            {{-- Bank Details --}}
+                            <div class="mb-4">
+                                <label for="bank_details" class="block font-medium text-sm text-gray-700">
+                                    Bank Account Details
+                                </label>
+                                <textarea id="bank_details" name="bank_details" rows="2" 
+                                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md" 
+                                    placeholder="e.g. GCB Bank - Accra Branch - Account Number - Name">{{ Auth::user()->bank_details }}</textarea>
+                            </div>
+
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition">
+                                Save Wallet Settings
+                            </button>
+                            
+                            <p class="mt-2 text-xs text-gray-500">
+                                Saved details will auto-fill your Withdrawal Requests.
+                            </p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Section 4: Investment History --}}
+            <div class="flex justify-between items-center mt-8 mb-4">
+                <h3 class="text-xl font-bold text-amber-900 pl-2 border-l-4 border-green-700"> Your Investment History</h3>
+                <a href="{{ route('marketplace.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
+                    Browse Marketplace
+                </a>
+            </div>
+
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200">
+                @if($investments->isEmpty())
+                    <div class="p-12 text-center">
+                        <div class="mx-auto h-24 w-24 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                            <svg class="h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-900">No Investments Yet</h3>
+                        <p class="mt-2 text-gray-500 max-w-sm mx-auto">You haven't purchased any packages yet.</p>
+                    </div>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount Invested</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exp. ROI</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach($investments as $investment)
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            {{ $investment->created_at->format('M d, Y') }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {{ $investment->package->name ?? 'N/A' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {{ $investment->units }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                            GH₵ {{ number_format($investment->amount_invested, 2) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-green-600">
+                                            GH₵ {{ number_format($investment->expected_roi, 2) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                @if($investment->status === 'active') bg-green-100 text-green-800 
+                                                @elseif($investment->status === 'pending') bg-yellow-100 text-yellow-800
+                                                @else bg-gray-100 text-gray-800 @endif">
+                                                {{ ucfirst($investment->status) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Section 4: Withdrawal History --}}
+            <h3 class="text-xl font-bold text-amber-900 mb-4 pl-2 border-l-4 border-yellow-500 mt-8"> Withdrawal History</h3>
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg border border-gray-200 mb-8">
+                @if(Auth::user()->withdrawals->isEmpty())
+                    <div class="p-6 text-center text-gray-500">
+                        No withdrawal history found.
+                    </div>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @foreach(Auth::user()->withdrawals as $withdrawal)
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $withdrawal->created_at->format('M d, Y') }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">GH₵ {{ number_format($withdrawal->amount, 2) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            @if($withdrawal->status === 'pending')
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">Pending</span>
+                                            @elseif($withdrawal->status === 'approved')
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Approved</span>
+                                            @else
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Rejected</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
+            </div>
+
+        </div>
+    </div>
+</x-app-layout>
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\resources\views\layouts\app.blade.php ===
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>{{ config('app.name', 'Laravel') }}</title>
+        <!-- Favicon -->
+        <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+        <!-- Scripts -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="//unpkg.com/alpinejs" defer></script>
+    </head>
+    <body class="font-sans antialiased">
+        <div class="min-h-screen bg-gray-100">
+            @include('layouts.navigation')
+
+            <!-- Page Heading -->
+            @isset($header)
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endisset
+
+            <!-- Page Content -->
+            <main>
+                {{ $slot }}
+            </main>
+        </div>
+    </body>
+</html>
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\resources\views\layouts\guest.blade.php ===
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+
+        <title>{{ config('app.name', 'Laravel') }}</title>
+        <!-- Favicon -->
+        <link rel="icon" href="{{ asset('favicon.png') }}" type="image/png">
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.bunny.net">
+        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+
+        <!-- Scripts -->
+        <script src="https://cdn.tailwindcss.com"></script>
+        <script src="//unpkg.com/alpinejs" defer></script>
+    </head>
+    <body class="font-sans text-gray-900 antialiased">
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
+            <div>
+                <a href="/">
+                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                </a>
+            </div>
+
+            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg">
+                {{ $slot }}
+            </div>
+        </div>
+    </body>
+</html>
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\resources\views\layouts\master.blade.php ===
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>@yield('title', 'Castle Royal Agro - Ghana Green Gold')</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'moringa-leaf': '#2E7D32',
+                        'moringa-light': '#81C784',
+                        'ghana-gold': '#FFD700',
+                        'soil-brown': '#5D4037',
+                        'cloud-white': '#F9FAFB',
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Mobile Stability Fixes */
+        html, body { 
+            overflow-x: hidden; 
+            width: 100%;
+            position: relative;
+        }
+        
+        /* Floating Animation for WhatsApp */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body class="bg-cloud-white font-sans text-gray-800 flex flex-col min-h-screen">
+
+    {{-- NAVIGATION (Hidden on Dashboard) --}}
+    @unless(Request::is('dashboard'))
+    <nav class="bg-white fixed w-full top-0 z-[100] border-b-4 border-moringa-leaf shadow-md transition-all duration-300 h-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
+            <div class="flex justify-between items-center h-full">
+                
+                {{-- LOGO --}}
+                <div class="flex items-center">
+                    <a href="{{ url('/') }}" class="flex items-center space-x-3 cursor-pointer z-[101]">
+                        <img src="{{ asset('logo.jpg') }}" alt="Castle Royal Logo" class="h-10 w-auto rounded-md object-contain">
+                        <div class="flex flex-col">
+                            <span class="text-2xl font-black text-moringa-leaf tracking-tighter leading-none mb-1">CastleROYAL</span>
+                            <span class="text-xs font-bold text-ghana-gold tracking-widest uppercase leading-none">Agro Ghana Ltd</span>
+                        </div>
+                    </a>
+                </div>
+                
+                {{-- DESKTOP MENU --}}
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="{{ url('/') }}" class="text-gray-700 hover:text-moringa-leaf font-bold transition">Home</a>
+                    <a href="{{ url('/initiative') }}" class="text-gray-700 hover:text-moringa-leaf font-semibold transition">The 3GR Initiative</a>
+                    <a href="{{ url('/products') }}" class="text-gray-700 hover:text-moringa-leaf font-semibold transition">Green Gold Products</a>
+                    
+                    {{-- NEW: Contact Trigger --}}
+                    <button onclick="openGlobalContact()" class="text-gray-700 hover:text-moringa-leaf font-semibold transition">Contact Us</button>
+
+                    <a href="{{ route('login') }}" class="bg-moringa-leaf text-white px-6 py-2 rounded-full font-bold hover:bg-green-800 transition shadow-lg hover:scale-105">
+                       Investor Login
+                    </a>
+                </div>
+
+                {{-- MOBILE HAMBURGER BUTTON --}}
+                <div class="md:hidden flex items-center relative z-[101]">
+                    <button onclick="toggleMobileMenu()" class="text-gray-700 hover:text-moringa-leaf focus:outline-none p-2 border border-gray-200 rounded-md bg-white">
+                        <svg class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        {{-- MOBILE MENU DROPDOWN --}}
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-gray-100 shadow-xl absolute w-full left-0 top-20 z-50 max-h-[calc(100vh-80px)] overflow-y-auto">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 flex flex-col items-center py-6">
+                <a href="{{ url('/') }}" class="block px-3 py-4 text-lg font-bold text-gray-700 hover:text-moringa-leaf hover:bg-green-50 w-full text-center rounded-md">Home</a>
+                <a href="{{ url('/initiative') }}" class="block px-3 py-4 text-lg font-medium text-gray-700 hover:text-moringa-leaf hover:bg-green-50 w-full text-center rounded-md">The 3GR Initiative</a>
+                <a href="{{ url('/products') }}" class="block px-3 py-4 text-lg font-medium text-gray-700 hover:text-moringa-leaf hover:bg-green-50 w-full text-center rounded-md">Green Gold Products</a>
+                
+                {{-- NEW: Mobile Contact Trigger --}}
+                <button onclick="openGlobalContact(); toggleMobileMenu();" class="block px-3 py-4 text-lg font-medium text-gray-700 hover:text-moringa-leaf hover:bg-green-50 w-full text-center rounded-md">Contact Us</button>
+                
+                <a href="{{ route('login') }}" class="mt-4 w-3/4 text-center bg-moringa-leaf text-white px-6 py-3 rounded-full font-bold shadow-md">Investor Login</a>
+            </div>
+        </div>
+    </nav>
+    @endunless
+
+    {{-- MAIN CONTENT --}}
+    <main class="flex-grow w-full overflow-x-hidden {{ Request::is('dashboard') ? '' : 'pt-20' }}"> 
+        @yield('content')
+    </main>
+
+    {{-- FOOTER --}}
+    <footer class="bg-soil-brown text-white pt-12 pb-8 mt-auto relative z-10 w-full">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+            <div>
+                <h3 class="text-ghana-gold font-bold text-lg mb-4">Castle Royal Agro</h3>
+                <p class="text-gray-300 text-sm leading-relaxed px-4 md:px-0">
+                    Leading the Ghana Green Gold Revolution (3GR). Industrializing Moringa to create jobs.
+                </p>
+            </div>
+            <div class="mt-6 md:mt-0">
+                <h3 class="text-ghana-gold font-bold text-lg mb-4">Contact Us</h3>
+                <p class="text-gray-300 text-sm">📍 #2 Faanofa Street, Kokomlemle</p>
+                <p class="text-gray-300 text-sm mt-3">📞 0244776834</p>
+                {{-- NEW: Footer Contact Trigger --}}
+                <button onclick="openGlobalContact()" class="text-ghana-gold text-sm mt-2 hover:underline">Send us a message</button>
+            </div>
+            <div class="mt-6 md:mt-0">
+                <h3 class="text-ghana-gold font-bold text-lg mb-4">Quick Links</h3>
+                <ul class="text-gray-300 text-sm space-y-2">
+                    <li><a href="{{ route('login') }}" class="hover:text-ghana-gold transition">Prospectus</a></li>
+                    <li><a href="{{ url('/products') }}" class="hover:text-ghana-gold transition">Products</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="text-center text-gray-500 text-xs mt-10 border-t border-gray-700 pt-4">
+            &copy; 2026 Castle Royal Agro Ghana Ltd. All rights reserved.
+        </div>
+    </footer>
+
+    {{-- 4. GLOBAL FLOATING WHATSAPP (Visible on ALL Pages) --}}
+    <div class="fixed bottom-6 right-6 z-[200] animate-float">
+        <a href="https://wa.me/233240804388?text=Hello%20Castle%20Royal,%20I%20have%20an%20inquiry" target="_blank" class="flex items-center space-x-2 bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-full shadow-2xl transition transform hover:scale-110 border-2 border-white">
+            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+            <span class="font-bold hidden md:block">Chat on WhatsApp</span>
+        </a>
+    </div>
+
+    {{-- 5. GLOBAL GENERAL CONTACT MODAL (Hidden by default) --}}
+    <div id="globalContactModal" class="fixed inset-0 z-[200] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-80 transition-opacity backdrop-blur-sm" onclick="closeGlobalContact()"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div class="inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-2xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full border-t-8 border-ghana-gold">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-moringa-leaf sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-xl leading-6 font-bold text-gray-900">
+                                Contact Castle Royal Agro
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 mb-4">
+                                    Have a question? Fill out the form below and our team will get back to you within 24 hours.
+                                </p>
+                                
+                                <form action="https://formspree.io/f/mykpdezq" method="POST" class="space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Your Name</label>
+                                        <input type="text" name="name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-moringa-leaf focus:border-moringa-leaf sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Email Address</label>
+                                        <input type="email" name="email" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-moringa-leaf focus:border-moringa-leaf sm:text-sm">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Subject</label>
+                                        <select name="subject" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-moringa-leaf focus:border-moringa-leaf sm:text-sm">
+                                            <option>General Inquiry</option>
+                                            <option>Partnership Proposal</option>
+                                            <option>Farm Visit Request</option>
+                                            <option>Media / Press</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700">Message</label>
+                                        <textarea name="message" rows="3" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-moringa-leaf focus:border-moringa-leaf sm:text-sm"></textarea>
+                                    </div>
+
+                                    <div class="bg-gray-50 pt-4 sm:flex sm:flex-row-reverse">
+                                        <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-moringa-leaf text-base font-medium text-white hover:bg-green-800 sm:ml-3 sm:w-auto sm:text-sm">
+                                            Send Message
+                                        </button>
+                                        <button type="button" onclick="closeGlobalContact()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                document.body.style.overflow = 'hidden'; // Lock scrolling
+            } else {
+                menu.classList.add('hidden');
+                document.body.style.overflow = 'auto'; // Unlock scrolling
+            }
+        }
+
+        // Global Contact Modal Logic
+        function openGlobalContact() {
+            document.getElementById('globalContactModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeGlobalContact() {
+            document.getElementById('globalContactModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function submitGlobalContact() {
+            // Simulate sending
+            alert("Message Sent! Thank you for contacting Castle Royal Agro. We will reply shortly.");
+            closeGlobalContact();
+        }
+    </script>
+
+</body>
+</html>
+
+=== FILE: C:\Users\bolly\OneDrive\Desktop\Castle Royal Project\CastleRoyalAgro\resources\views\layouts\navigation.blade.php ===
+<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
+    <!-- Primary Navigation Menu -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between h-16">
+            <div class="flex">
+                <!-- Logo -->
+                <div class="shrink-0 flex items-center">
+                    <a href="{{ route('dashboard') }}">
+                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                    </a>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+
+                    <!-- Strict Admin Menu (System Owner & Super Admin only) -->
+                    <!-- Strict Admin Menu (System Owner & Super Admin only) -->
+                    @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']))
+                        <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                            {{ __('User Management') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                            {{ __('Admin Panel') }}
+                        </x-nav-link>
+
+                        @if(auth()->user()->hasRole('System Owner') || auth()->user()->can('view_audit_logs'))
+                            <x-nav-link :href="route('admin.audit-logs.index')" :active="request()->routeIs('admin.audit-logs.*')">
+                                {{ __('Audit Logs') }}
+                            </x-nav-link>
+                        @endif
+
+                        @if(auth()->user()->hasRole('System Owner'))
+                            <x-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">
+                                <span class="text-red-600 font-bold">{{ __('System Settings') }}</span>
+                            </x-nav-link>
+                        @endif
+                    @endif
+
+                    <!-- Operational Admin Menu (Includes regular Admin) -->
+                    <!-- Operational Admin Menu (Includes regular Admin) -->
+                    @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin']))
+                        <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
+                            {{ __('Packages') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('admin.investments.index')" :active="request()->routeIs('admin.investments.*')">
+                            {{ __('Investments') }}
+                        </x-nav-link>
+
+                        <x-nav-link :href="route('admin.withdrawals.index')" :active="request()->routeIs('admin.withdrawals.*')">
+                            {{ __('Withdrawal Requests') }}
+                        </x-nav-link>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Settings Dropdown -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <x-dropdown align="right" width="48">
+                    <x-slot name="trigger">
+                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                            <div>{{ Auth::user()->name }}</div>
+
+                            <div class="ms-1">
+                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </div>
+                        </button>
+                    </x-slot>
+
+                    <x-slot name="content">
+                        <x-dropdown-link :href="route('profile.edit')">
+                            {{ __('Profile') }}
+                        </x-dropdown-link>
+
+                        <!-- Authentication -->
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+
+                            <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                {{ __('Log Out') }}
+                            </x-dropdown-link>
+                        </form>
+                    </x-slot>
+                </x-dropdown>
+            </div>
+
+            <!-- Hamburger -->
+            <div class="-me-2 flex items-center sm:hidden">
+                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
+                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Responsive Navigation Menu -->
+    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
+        <div class="pt-2 pb-3 space-y-1">
+            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <!-- Strict Admin Menu (Mobile) -->
+            <!-- Strict Admin Menu (Mobile) -->
+            @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']))
+                <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
+                    {{ __('User Management') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
+                    {{ __('Admin Panel') }}
+                </x-responsive-nav-link>
+
+                @if(auth()->user()->hasRole('System Owner') || auth()->user()->can('view_audit_logs'))
+                    <x-responsive-nav-link :href="route('admin.audit-logs.index')" :active="request()->routeIs('admin.audit-logs.*')">
+                        {{ __('Audit Logs') }}
+                    </x-responsive-nav-link>
+                @endif
+
+                @if(auth()->user()->hasRole('System Owner'))
+                    <x-responsive-nav-link :href="route('admin.settings.index')" :active="request()->routeIs('admin.settings.*')">
+                        <span class="text-red-600 font-bold">{{ __('System Settings') }}</span>
+                    </x-responsive-nav-link>
+                @endif
+            @endif
+
+            <!-- Operational Admin Menu (Mobile) -->
+            <!-- Operational Admin Menu (Mobile) -->
+            @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin']))
+                <x-responsive-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
+                    {{ __('Packages') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('admin.investments.index')" :active="request()->routeIs('admin.investments.*')">
+                    {{ __('Investments') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('admin.withdrawals.index')" :active="request()->routeIs('admin.withdrawals.*')">
+                    {{ __('Withdrawals') }}
+                </x-responsive-nav-link>
+            @endif
+        </div>
+
+        <!-- Responsive Settings Options -->
+        <div class="pt-4 pb-1 border-t border-gray-200">
+            <div class="px-4">
+                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
+                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+            </div>
+
+            <div class="mt-3 space-y-1">
+                <x-responsive-nav-link :href="route('profile.edit')">
+                    {{ __('Profile') }}
+                </x-responsive-nav-link>
+
+                <!-- Authentication -->
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+
+                    <x-responsive-nav-link :href="route('logout')"
+                            onclick="event.preventDefault();
+                                        this.closest('form').submit();">
+                        {{ __('Log Out') }}
+                    </x-responsive-nav-link>
+                </form>
+            </div>
+        </div>
+    </div>
+</nav>
+
