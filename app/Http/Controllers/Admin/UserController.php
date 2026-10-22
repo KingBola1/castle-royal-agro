@@ -11,29 +11,40 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $users = User::with('roles')->paginate(15);
+        $currentUser = auth()->user();
+        $query = User::with('roles');
+
+        // THE BLINDFOLD: Hide superiors based on who is logged in
+        if ($currentUser->role === 'super_admin') {
+            // Super Admins cannot see System Owners
+            $query->where('role', '!=', 'System Owner');
+        } elseif ($currentUser->role === 'admin') {
+            // Regular Admins can ONLY see investors
+            $query->where('role', 'investor');
+        }
+
+        $users = $query->paginate(15);
         return view('admin.users.index', compact('users'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        // THE FIX: Only pull the 4 official roles from the database. Ignore ghosts/typos.
-        $roles = Role::whereIn('name', ['System Owner', 'super_admin', 'admin', 'investor'])->get();
+        $currentUser = auth()->user();
+
+        // THE BLINDFOLD: Only show roles beneath the current user
+        if ($currentUser->hasRole('System Owner')) {
+            $roles = Role::whereIn('name', ['super_admin', 'admin', 'investor'])->get();
+        } elseif ($currentUser->role === 'super_admin') {
+            $roles = Role::whereIn('name', ['admin', 'investor'])->get();
+        } else {
+            $roles = Role::whereIn('name', ['investor'])->get();
+        }
         
         return view('admin.users.create', compact('roles'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
@@ -47,29 +58,40 @@ class UserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => $request->role, // Ensure database column is updated
         ]);
 
         $user->assignRole($request->role);
-        $user->markEmailAsVerified(); // Auto-verify administrative staff
+        $user->markEmailAsVerified();
 
-        return redirect()->route('users.index')->with('status', 'New staff member created successfully.');
+        return redirect()->route('users.index')->with('status', 'New user created successfully.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(User $user)
     {
-        // THE FIX: Only pull the 4 official roles for the edit screen too.
-        $roles = Role::whereIn('name', ['System Owner', 'super_admin', 'admin', 'investor'])->get();
+        $currentUser = auth()->user();
+
+        // Security Check: Prevent lower roles from manually typing a URL to edit superiors
+        if ($currentUser->role === 'admin' && $user->role !== 'investor') {
+            abort(403, 'You are not authorized to edit this user.');
+        }
+        if ($currentUser->role === 'super_admin' && $user->hasRole('System Owner')) {
+            abort(403, 'You are not authorized to edit the System Owner.');
+        }
+
+        // Dropdown blindfold
+        if ($currentUser->hasRole('System Owner')) {
+            $roles = Role::whereIn('name', ['super_admin', 'admin', 'investor'])->get();
+        } elseif ($currentUser->role === 'super_admin') {
+            $roles = Role::whereIn('name', ['admin', 'investor'])->get();
+        } else {
+            $roles = Role::whereIn('name', ['investor'])->get();
+        }
+
         $permissions = Permission::all();
-        
         return view('admin.users.edit', compact('user', 'roles', 'permissions'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, User $user)
     {
         $request->validate([
@@ -77,21 +99,22 @@ class UserController extends Controller
             'permissions' => 'array',
         ]);
 
-        // Sync Roles
         if ($request->has('roles')) {
             $user->syncRoles($request->roles);
+            // Keep the database text column in sync with Spatie
+            $user->role = $request->roles[0]; 
+            $user->save();
         } else {
             $user->syncRoles([]);
         }
 
-        // Sync Direct Permissions
         if ($request->has('permissions')) {
             $user->syncPermissions($request->permissions);
         } else {
             $user->syncPermissions([]);
         }
 
-        return redirect()->route('users.index')->with('status', 'User roles and permissions updated successfully.');
+        return redirect()->route('users.index')->with('status', 'User updated successfully.');
     }
 
     public function suspend($id)
@@ -99,11 +122,9 @@ class UserController extends Controller
         if (!auth()->user()->hasRole('System Owner')) {
             abort(403, 'Only the System Owner can suspend users.');
         }
-
         $user = User::findOrFail($id);
         $user->status = 'frozen';
         $user->save();
-
         return back()->with('status', "User {$user->name} has been suspended.");
     }
 
@@ -112,11 +133,9 @@ class UserController extends Controller
         if (!auth()->user()->hasRole('System Owner')) {
             abort(403, 'Only the System Owner can restore users.');
         }
-
         $user = User::findOrFail($id);
         $user->status = 'active';
         $user->save();
-
         return back()->with('status', "User {$user->name} has been restored.");
     }
 }
