@@ -1,5 +1,5 @@
 # Use PHP 8.4
-FROM php:8.4-apache
+FROM php:8.5.12-apache
 
 # Install dependencies (PostgreSQL support included)
 RUN apt-get update && apt-get install -y \
