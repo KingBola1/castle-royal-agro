@@ -82,6 +82,7 @@ Route::post('/users/{id}/suspend', [\App\Http\Controllers\Admin\UserController::
 Route::post('/users/{id}/restore', [\App\Http\Controllers\Admin\UserController::class, 'restore'])->name('users.restore');
 Route::post('/system/migrate', [\App\Http\Controllers\Admin\SystemController::class, 'runMigrations'])->name('system.migrate');
 Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+Route::get('/audit-logs/download', [\App\Http\Controllers\Admin\ReportController::class, 'downloadAuditLogs'])->name('reports.audit-logs');
 });
 
 Route::middleware(['auth', 'verified', 'role:System Owner', \App\Http\Middleware\RequireTwoFactor::class])->prefix('admin')->name('admin.')->group(function () {
