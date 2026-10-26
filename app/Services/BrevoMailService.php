@@ -14,16 +14,14 @@ class BrevoMailService
      * @param string $toName Recipient Name
      * @param string $subject Email Subject
      * @param string $htmlContent HTML Body
+     * @param string|null $replyToEmail Optional: Email address for replies (used for Contact Forms)
+     * @param string|null $replyToName Optional: Name for replies
      * @return bool True if successful, False otherwise
      */
-    public static function send($toEmail, $toName, $subject, $htmlContent)
+    public static function send($toEmail, $toName, $subject, $htmlContent, $replyToEmail = null, $replyToName = null)
     {
         try {
-            $response = Http::withHeaders([
-                'api-key' => env('BREVO_API_KEY'),
-                'Content-Type' => 'application/json',
-                'Accept' => 'application/json',
-            ])->post('https://api.brevo.com/v3/smtp/email', [
+            $payload = [
                 'sender' => [
                     'name' => env('MAIL_FROM_NAME', 'Castle Royal Agro'),
                     'email' => env('MAIL_FROM_ADDRESS')
@@ -36,7 +34,21 @@ class BrevoMailService
                 ],
                 'subject' => $subject,
                 'htmlContent' => $htmlContent
-            ]);
+            ];
+
+            // If a visitor sent a contact form, set their email as the Reply-To address
+            if ($replyToEmail) {
+                $payload['replyTo'] = [
+                    'email' => $replyToEmail,
+                    'name' => $replyToName ?? 'Website Visitor'
+                ];
+            }
+
+            $response = Http::withHeaders([
+                'api-key' => env('BREVO_API_KEY'),
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ])->post('https://api.brevo.com/v3/smtp/email', $payload);
 
             if ($response->successful()) {
                 Log::info("Brevo Email Sent to {$toEmail}: {$subject}");

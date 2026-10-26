@@ -9,7 +9,6 @@ class ContactController extends Controller
 {
     public function submit(Request $request)
     {
-        // 1. Ensure the user filled out all fields correctly
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255',
@@ -17,7 +16,6 @@ class ContactController extends Controller
             'message' => 'required|string',
         ]);
 
-        // 2. Format the email beautifully
         $htmlContent = "
             <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px; max-width: 600px;'>
                 <h2 style='color: #2E7D32;'>New Website Inquiry</h2>
@@ -29,15 +27,16 @@ class ContactController extends Controller
             </div>
         ";
 
-        // 3. Send it to the System Owner via Brevo
+        // Send to System Owner, but set the "Reply-To" to the visitor's email
         BrevoMailService::send(
-            env('MAIL_FROM_ADDRESS'), // This sends it to your admin email defined in .env
+            env('MAIL_FROM_ADDRESS'), 
             'Castle Royal Admin',
             'New Website Inquiry: ' . $validated['subject'],
-            $htmlContent
+            $htmlContent,
+            $validated['email'], // $replyToEmail
+            $validated['name']   // $replyToName
         );
 
-        // 4. Send the user back to the page with a success message
         return back()->with('success', 'Message Sent! Thank you for contacting Castle Royal Agro. We will reply shortly.');
     }
 }
