@@ -17,7 +17,6 @@
                     </x-nav-link>
 
                     <!-- Strict Admin Menu (System Owner & Super Admin only) -->
-                    <!-- Strict Admin Menu (System Owner & Super Admin only) -->
                     @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']))
                         <x-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
                             {{ __('User Management') }}
@@ -41,14 +40,13 @@
                     @endif
 
                     <!-- Operational Admin Menu (Includes regular Admin) -->
-                    <!-- Operational Admin Menu (Includes regular Admin) -->
                     @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin']))
                         <x-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
                             {{ __('Packages') }}
                         </x-nav-link>
 
                         <x-nav-link :href="route('admin.investments.index')" :active="request()->routeIs('admin.investments.*')">
-                            {{ __('Investments') }}
+                            {{ __('Holdings') }}
                         </x-nav-link>
 
                         <x-nav-link :href="route('admin.withdrawals.index')" :active="request()->routeIs('admin.withdrawals.*')">
@@ -110,7 +108,7 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
-            <!-- Strict Admin Menu (Mobile) -->
+            
             <!-- Strict Admin Menu (Mobile) -->
             @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']))
                 <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')">
@@ -135,14 +133,13 @@
             @endif
 
             <!-- Operational Admin Menu (Mobile) -->
-            <!-- Operational Admin Menu (Mobile) -->
             @if(auth()->check() && auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin']))
                 <x-responsive-nav-link :href="route('admin.packages.index')" :active="request()->routeIs('admin.packages.*')">
                     {{ __('Packages') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link :href="route('admin.investments.index')" :active="request()->routeIs('admin.investments.*')">
-                    {{ __('Investments') }}
+                    {{ __('Holdings') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link :href="route('admin.withdrawals.index')" :active="request()->routeIs('admin.withdrawals.*')">

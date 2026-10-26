@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>New Investment Alert</title>
+    <title>New Holding Alert</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
     <div style="max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;">
-        <h2 style="color: #2d3748; text-align: center;">New Investment Received</h2>
+        <h2 style="color: #2d3748; text-align: center;">New Holding Received</h2>
         
         <p>Hello Admin,</p>
         
-        <p>A new investment has been placed on the platform. Please review and approve it.</p>
+        <p>A new holding request has been placed on the platform. Please review and approve it.</p>
         
         <div style="background-color: #f7fafc; padding: 15px; border-radius: 5px; margin: 20px 0;">
-            <p><strong>Investor:</strong> {{ $investment->user->name }} ({{ $investment->user->email }})</p>
+            <p><strong>Holder:</strong> {{ $investment->user->name }} ({{ $investment->user->email }})</p>
             <p><strong>Package:</strong> {{ $investment->package->name }}</p>
             <p><strong>Units Purchased:</strong> {{ $investment->units }}</p>
             <p><strong>Total Amount:</strong> GHS {{ number_format($investment->amount_invested, 2) }}</p>

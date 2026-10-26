@@ -19,7 +19,27 @@
         "vite": "^7.0.7"
     },
     "dependencies": {
+        "@capacitor/android": "^8.5.3",
+        "@capacitor/cli": "^8.5.3",
+        "@capacitor/core": "^8.5.3",
+        "@capacitor/ios": "^8.5.3",
         "@tailwindcss/postcss": "^4.1.18",
         "chart.js": "^4.5.1"
-    }
+    },
+    "name": "castleroyalagro",
+    "version": "1.0.0",
+    "description": "Castle Royal Agro is a robust, highly secure agricultural investment web application built to power the Ghana Green Gold Revolution (3GR). The platform allows users to browse agricultural packages, invest capital by purchasing units, track their pure-profit projected ROI, and request withdrawals upon maturity.",
+    "main": "postcss.config.js",
+    "directories": {
+        "test": "tests"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/KingBola1/castle-royal-agro.git"
+    },
+    "keywords": [],
+    "bugs": {
+        "url": "https://github.com/KingBola1/castle-royal-agro/issues"
+    },
+    "homepage": "https://github.com/KingBola1/castle-royal-agro#readme"
 }

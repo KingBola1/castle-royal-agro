@@ -4,7 +4,7 @@
             @if(auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin', 'Admin', 'admin']))
                 Staff Dashboard
             @else
-                Investor Portfolio
+                Holder Portfolio
             @endif
         </h2>
     </x-slot>
@@ -33,7 +33,7 @@
             <div class="mb-6 bg-red-50 border-l-4 border-red-600 p-4 rounded shadow-sm flex justify-between items-center">
                 <div>
                     <h3 class="text-red-800 font-bold text-lg">System Management</h3>
-                    <p class="text-sm text-red-600">Access the secure back-office to manage users and investments.</p>
+                    <p class="text-sm text-red-600">Access the secure back-office to manage users and holdings.</p>
                 </div>
                 <a href="{{ route('admin.dashboard') }}" class="bg-red-700 hover:bg-red-800 text-white font-bold py-3 px-6 rounded-lg shadow-md uppercase tracking-wider transition transform hover:scale-105">
                     Enter Back-Office
@@ -57,7 +57,7 @@
                                 @endif
                             </h3>
                             <p class="text-gray-500 mt-2 text-lg">
-                                Investor ID: <span class="font-mono text-amber-800 font-bold">CRA-{{ $user->id }}-{{ $user->created_at->format('Y') }}</span>
+                                Holder ID: <span class="font-mono text-amber-800 font-bold">CRA-{{ $user->id }}-{{ $user->created_at->format('Y') }}</span>
                             </p>
                         </div>
                         <div class="mt-4 md:mt-0 text-center md:text-right">
@@ -74,10 +74,10 @@
             {{-- Section 2: Financial Stats Grid --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                 
-                {{-- Card 1: Total Investment --}}
+                {{-- Card 1: Total Holding --}}
                 <div class="bg-white overflow-hidden shadow-lg rounded-xl p-8 border border-gray-100 hover:shadow-2xl transition duration-300">
                     <div class="flex items-center justify-between mb-4">
-                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Invested</h4>
+                        <h4 class="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Holdings</h4>
                         <div class="p-3 bg-yellow-50 rounded-full">
                             <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
@@ -145,7 +145,7 @@
                     <div class="relative z-10">
                         <p class="text-xs font-bold text-yellow-400 uppercase tracking-widest mb-1">Action Required</p>
                         <h4 class="text-2xl font-bold mb-4">Complete Profile</h4>
-                        <p class="text-sm text-gray-200 mb-6">Add your Phone, Next of Kin, and Ghana Card to unlock investments.</p>
+                        <p class="text-sm text-gray-200 mb-6">Add your Phone, Next of Kin, and Ghana Card to unlock holdings.</p>
                         <a href="{{ route('profile.edit') }}" class="inline-block w-full bg-yellow-500 text-amber-900 text-center font-bold py-3 px-4 rounded shadow hover:bg-white hover:text-green-700 transition duration-300">
                             Go to Settings
                         </a>
@@ -196,9 +196,9 @@
                 </div>
             </div>
 
-            {{-- Section 4: Investment History --}}
+            {{-- Section 4: Holding History --}}
             <div class="flex justify-between items-center mt-8 mb-4">
-                <h3 class="text-xl font-bold text-amber-900 pl-2 border-l-4 border-green-700"> Your Investment History</h3>
+                <h3 class="text-xl font-bold text-amber-900 pl-2 border-l-4 border-green-700"> Your Holding History</h3>
                 <a href="{{ route('marketplace.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none">
                     Browse Marketplace
                 </a>
@@ -212,7 +212,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                             </svg>
                         </div>
-                        <h3 class="text-lg font-medium text-gray-900">No Investments Yet</h3>
+                        <h3 class="text-lg font-medium text-gray-900">No Holdings Yet</h3>
                         <p class="mt-2 text-gray-500 max-w-sm mx-auto">You haven't purchased any packages yet.</p>
                     </div>
                 @else
@@ -223,7 +223,7 @@
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount Invested</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount Held</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Exp. ROI</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                 </tr>

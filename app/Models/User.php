@@ -89,7 +89,7 @@ class User extends Authenticatable implements MustVerifyEmail
                 <div style='font-family: Arial; padding: 20px; border: 1px solid #eee;'>
                     <h2>Welcome, {$user->name}!</h2>
                     <p>Thank you for joining <strong>Castle Royal Agro</strong>. We are excited to have you on board.</p>
-                    <p>You can now log in to your dashboard to view investment packages and track your portfolio.</p>
+                    <p>You can now log in to your dashboard to view holding packages and track your portfolio.</p>
                     <br>
                     <a href='" . route('login') . "' style='background-color: #2d3748; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Login to Dashboard</a>
                 </div>"

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('All Investments') }}
+            {{ __('All Holdings') }}
         </h2>
     </x-slot>
 
@@ -12,7 +12,7 @@
 
                     {{-- REPORT BUTTONS HEADER --}}
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-6 border-b pb-4">
-                        <h3 class="text-xl font-bold text-gray-900">Investment Records</h3>
+                        <h3 class="text-xl font-bold text-gray-900">Holding Records</h3>
                         <div class="flex space-x-3 mt-4 sm:mt-0">
                             <a href="{{ route('admin.reports.investments', ['format' => 'csv']) }}" class="inline-flex items-center px-4 py-2 bg-green-50 border border-green-600 rounded-md font-semibold text-xs text-green-700 uppercase tracking-widest hover:bg-green-600 hover:text-white transition shadow-sm">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg> Download Excel
@@ -39,7 +39,7 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Investor</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Holder</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Package</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Units</th>
                                     <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
@@ -86,11 +86,11 @@
                                             @if($investment->status === 'pending')
                                                 <div class="flex space-x-2">
                                                     @if(auth()->user()->hasAnyRole(['System Owner', 'Super Admin', 'super_admin']) || auth()->user()->hasDirectPermission('manage_investments'))
-                                                        <form action="{{ route('admin.investments.approve', $investment) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve this investment?');">
+                                                        <form action="{{ route('admin.investments.approve', $investment) }}" method="POST" onsubmit="return confirm('Are you sure you want to approve this holding?');">
                                                             @csrf
                                                             <button type="submit" class="text-green-600 hover:text-green-900 font-bold">Approve</button>
                                                         </form>
-                                                        <form action="{{ route('admin.investments.reject', $investment) }}" method="POST" onsubmit="return confirm('Are you sure you want to reject this investment?');">
+                                                        <form action="{{ route('admin.investments.reject', $investment) }}" method="POST" onsubmit="return confirm('Are you sure you want to reject this holding?');">
                                                             @csrf
                                                             <button type="submit" class="text-red-600 hover:text-red-900 font-bold">Reject</button>
                                                         </form>
@@ -105,7 +105,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No investments found.</td>
+                                        <td colspan="8" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">No holdings found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>

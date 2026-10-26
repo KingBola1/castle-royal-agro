@@ -1,6 +1,6 @@
 @extends('layouts.master')
 
-@section('title', 'Investor Portal - Castle Royal Agro')
+@section('title', 'Holder Portal - Castle Royal Agro')
 
 @section('content')
 <div class="flex flex-col md:flex-row min-h-[calc(100vh-80px)]"> {{-- Subtract nav height --}}
@@ -13,7 +13,7 @@
         <div class="w-full max-w-md relative z-10">
             <div class="mb-10 text-center md:text-left">
                 <span class="inline-block py-1 px-3 bg-green-50 text-moringa-leaf text-xs font-bold tracking-widest uppercase mb-4 rounded-full border border-green-200">Secure Gateway</span>
-                <h1 class="text-4xl font-black text-gray-900 mb-2">Investor Portal Access</h1>
+                <h1 class="text-4xl font-black text-gray-900 mb-2">Holder Portal Access</h1>
                 <p class="text-gray-500">Welcome back, Partner. Please authenticate to continue.</p>
             </div>
 
