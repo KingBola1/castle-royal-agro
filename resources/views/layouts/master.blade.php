@@ -28,8 +28,8 @@
     </script>
     <style>
         /* Mobile Stability Fixes */
-        html, body {
-            overflow-x: hidden;
+        html, body { 
+            overflow-x: hidden; 
             width: 100%;
             position: relative;
         }
@@ -46,7 +46,27 @@
     </style>
 </head>
 
-<body class="bg-cloud-white font-sans text-gray-800 flex flex-col min-h-screen">
+<body class="bg-cloud-white font-sans text-gray-800 flex flex-col min-h-screen relative">
+
+    {{-- SUCCESS TOAST NOTIFICATION --}}
+    @if(session('success'))
+        <div id="toast-success" class="fixed top-24 right-6 z-[300] bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded shadow-2xl flex items-center justify-between min-w-[300px]">
+            <div class="flex items-center">
+                <svg class="w-6 h-6 mr-3 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span class="font-bold text-sm">{{ session('success') }}</span>
+            </div>
+            <button onclick="document.getElementById('toast-success').remove()" class="text-green-700 hover:text-green-900 ml-4 focus:outline-none">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <script>
+            // Auto-hide the toast after 5 seconds
+            setTimeout(() => {
+                const toast = document.getElementById('toast-success');
+                if(toast) toast.remove();
+            }, 5000);
+        </script>
+    @endif
 
     {{-- NAVIGATION (Hidden on Dashboard) --}}
     @unless(Request::is('dashboard'))
@@ -107,7 +127,7 @@
     @endunless
 
     {{-- MAIN CONTENT --}}
-    <main class="flex-grow w-full overflow-x-hidden {{ Request::is('dashboard') ? '' : 'pt-20' }}">
+    <main class="flex-grow w-full overflow-x-hidden {{ Request::is('dashboard') ? '' : 'pt-20' }}"> 
         @yield('content')
     </main>
 
@@ -148,7 +168,7 @@
         </a>
     </div>
 
-    {{-- 5. GLOBAL GENERAL CONTACT MODAL (Hidden by default) --}}
+    {{-- 5. NATIVE SECURE CONTACT MODAL (Linked to Laravel Backend) --}}
     <div id="globalContactModal" class="fixed inset-0 z-[200] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <div class="fixed inset-0 bg-gray-900 bg-opacity-80 transition-opacity backdrop-blur-sm" onclick="closeGlobalContact()"></div>
@@ -172,7 +192,9 @@
                                     Have a question? Fill out the form below and our team will get back to you within 24 hours.
                                 </p>
                                 
-                                <form action="https://formspree.io/f/mykpdezq" method="POST" class="space-y-4">
+                                {{-- NATIVE LARAVEL FORM --}}
+                                <form action="{{ route('contact.submit') }}" method="POST" class="space-y-4">
+                                    @csrf
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700">Your Name</label>
                                         <input type="text" name="name" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:ring-moringa-leaf focus:border-moringa-leaf sm:text-sm">
@@ -197,7 +219,7 @@
 
                                     <div class="bg-gray-50 pt-4 sm:flex sm:flex-row-reverse">
                                         <button type="submit" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-moringa-leaf text-base font-medium text-white hover:bg-green-800 sm:ml-3 sm:w-auto sm:text-sm">
-                                            Send Message
+                                            Send Secure Message
                                         </button>
                                         <button type="button" onclick="closeGlobalContact()" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                                             Cancel

@@ -16,6 +16,10 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Http\Controllers\ContactController;
+
+// Public Contact Form Route
+Route::post('/contact-submit', [ContactController::class, 'submit'])->name('contact.submit');
 
 Route::get('/', function () { return view('welcome'); });
 Route::get('/initiative', [PageController::class, 'initiative'])->name('initiative');
